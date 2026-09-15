@@ -542,15 +542,35 @@
     <h2>Motor de IA</h2>
     <p>O professor usa um modelo de linguagem para julgar sinônimos, explicar erros, conversar na etapa 5 e escrever o relatório. Aqui você escolhe por onde essas chamadas passam. No modo automático o app tenta um provedor de cada vez e fica com o primeiro que responder.</p>
 
+    <p class="warn-note" style="color:var(--blue);border-left-color:var(--blue);background:var(--soft)">Dentro de uma janela embutida — como a pré-visualização aqui no chat — o navegador bloqueia chamadas para fora e só o provedor Anthropic responde. Para testar Gemini, Puter ou um endpoint próprio, abra o arquivo em uma aba própria ou na página já publicada.</p>
+
     <label class="fl">Provedor
       <select id="aiMode">
         <option value="auto">Automático — tenta na ordem</option>
+        <option value="google">Google Gemini — chave gratuita do AI Studio</option>
         <option value="anthropic">Anthropic — só funciona dentro do Claude</option>
         <option value="puter">Puter.js — sem chave, qualquer hospedagem</option>
         <option value="pollinations">Pollinations — sem chave, anônimo</option>
         <option value="custom">Endpoint próprio — compatível com OpenAI</option>
       </select>
     </label>
+
+    <div id="googleBox" hidden>
+      <label class="fl">Chave da API Gemini
+        <input id="gKey" type="password" autocomplete="off" placeholder="AIza…">
+      </label>
+      <label class="fl">Modelo
+        <select id="gModelSel"></select>
+      </label>
+      <input id="gModel" hidden placeholder="identificador do modelo" autocomplete="off"
+             style="width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:var(--r);font-family:var(--sans);font-size:14.5px;margin:-6px 0 12px">
+      <button class="btn ghost" id="gList" style="margin:-4px 0 12px">Ver modelos da minha chave</button>
+      <p class="cue" style="display:block;margin:-4px 0 12px">
+        Gere a chave em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>.
+        O nível gratuito tem limite por minuto e por dia, suficiente para sessões de estudo.
+      </p>
+      <p class="warn-note">A chave fica gravada só neste navegador, mas o site publicado a envia a partir do cliente. Em página pública, restrinja a chave por domínio no Google Cloud ou use um proxy.</p>
+    </div>
 
     <div id="customBox" hidden>
       <label class="fl">URL do endpoint
@@ -1057,7 +1077,10 @@ const AI = {
   order:["anthropic","puter","pollinations"],
   active:null,
   dead:{},
-  custom:{url:"",model:"",key:""}
+  custom:{url:"",model:"",key:""},
+  google:{key:"",model:""},
+  googleUsed:null,
+  googleList:[]
 };
 
 function withTimeout(promise, ms, label){
@@ -1139,6 +1162,163 @@ async function pPollinations(system, messages){
   return t;
 }
 
+/* --- Google Gemini: chave gratuita do AI Studio --- */
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+function gErr(msg, status, transient){
+  const e = new Error(msg);
+  e.status = status; e.transient = !!transient;
+  return e;
+}
+
+async function geminiCall(model, system, messages, key){
+  const base = "https://generativelanguage.googleapis.com/v1beta/models/"+
+               encodeURIComponent(model)+":generateContent";
+
+  // a família 2.5 aceita thinkingBudget; da 3 em diante o parâmetro mudou,
+  // então nesses modelos o campo é omitido e o limite de saída sobe
+  const major = parseFloat((model.match(/gemini-(\d+(?:\.\d+)?)/)||[])[1]) || 2.5;
+  const legacyThinking = major < 3;
+
+  const payload = {
+    system_instruction:{parts:[{text:system}]},
+    contents: messages.map(m=>({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{text:String(m.content)}]
+    })),
+    generationConfig:{
+      maxOutputTokens: legacyThinking ? 2048 : 4096,
+      temperature:0.7
+    }
+  };
+  // sem isto os modelos 2.5 gastam todo o orçamento "pensando" e devolvem texto vazio
+  if(legacyThinking) payload.generationConfig.thinkingConfig = {thinkingBudget:0};
+  else payload.generationConfig.thinkingLevel = "low";
+
+  async function send(b){
+    const ctrl = new AbortController();
+    const cut = setTimeout(()=>ctrl.abort(), 25000);
+    try{
+      try{
+        return await fetch(base,{
+          method:"POST",
+          headers:{"Content-Type":"application/json","x-goog-api-key":key},
+          body:b, signal:ctrl.signal
+        });
+      }catch(e1){
+        if(e1.name === "AbortError")
+          throw gErr("o modelo não respondeu em 25s", 0, true);
+        // o cabeçalho personalizado dispara preflight; se ele for barrado, tenta pela query
+        try{
+          return await fetch(base+"?key="+encodeURIComponent(key),{
+            method:"POST", headers:{"Content-Type":"application/json"}, body:b, signal:ctrl.signal
+          });
+        }catch(e2){
+          if(e2.name === "AbortError") throw gErr("o modelo não respondeu em 25s", 0, true);
+          throw gErr("conexão bloqueada — este ambiente não deixa chamar generativelanguage.googleapis.com", 0, false);
+        }
+      }
+    }finally{ clearTimeout(cut); }
+  }
+
+  let r = await send(JSON.stringify(payload));
+  let d = await r.json().catch(()=>null);
+
+  // cada modelo aceita um conjunto diferente de campos; se a API reclamar de um
+  // nome desconhecido, ele é retirado e a chamada é refeita
+  for(let i=0; i<4 && !r.ok && r.status === 400; i++){
+    const msg = (d && d.error && d.error.message) || "";
+    const hit = msg.match(/Unknown name "([^"]+)"/);
+    if(!hit) break;
+    const field = hit[1];
+
+    if(field === "system_instruction" || field === "systemInstruction"){
+      // modelo sem suporte a instrução de sistema: ela vira o início da conversa
+      delete payload.system_instruction;
+      if(payload.contents[0] && payload.contents[0].role === "user"){
+        payload.contents[0].parts[0].text = system+"\n\n"+payload.contents[0].parts[0].text;
+      }else{
+        payload.contents.unshift({role:"user",parts:[{text:system}]});
+      }
+    }else if(payload.generationConfig && field in payload.generationConfig){
+      delete payload.generationConfig[field];
+    }else if(field in payload){
+      delete payload[field];
+    }else{
+      break;
+    }
+
+    r = await send(JSON.stringify(payload));
+    d = await r.json().catch(()=>null);
+  }
+
+  if(!r.ok){
+    const msg = (d && d.error && d.error.message) || ("HTTP "+r.status);
+    const busy = /high demand|overloaded|unavailable|try again later|temporar/i.test(msg)
+              || [500,502,503,504].indexOf(r.status) > -1;
+    if(busy) throw gErr("modelo congestionado no momento", r.status, true);
+    if(r.status === 429) throw gErr("limite de uso atingido neste modelo", 429, true);
+    if(r.status === 400 && /api key not valid|invalid api key/i.test(msg)) throw gErr("chave inválida", 400, false);
+    if(r.status === 401 || r.status === 403) throw gErr("acesso negado — confira as restrições da chave e se a Generative Language API está ativada no projeto", r.status, false);
+    if(r.status === 404) throw gErr("modelo \u201C"+model+"\u201D não existe para esta chave", 404, false);
+    throw gErr(msg, r.status, false);
+  }
+
+  const cand = d && d.candidates && d.candidates[0];
+  const parts = cand && cand.content && cand.content.parts;
+  const t = Array.isArray(parts) ? parts.map(p=>p.text||"").join("").trim() : "";
+
+  if(!t){
+    const why = (cand && cand.finishReason) || (d && d.promptFeedback && d.promptFeedback.blockReason) || "";
+    if(why === "MAX_TOKENS") throw gErr("resposta cortada pelo limite de tokens", 200, false);
+    if(why === "SAFETY" || why === "PROHIBITED_CONTENT") throw gErr("resposta bloqueada pelo filtro de conteúdo", 200, false);
+    throw gErr("resposta vazia"+(why?" ("+why+")":""), 200, true);
+  }
+  return t;
+}
+
+async function pGoogle(system, messages){
+  const g = AI.google;
+  if(!g.key) throw new Error("chave não preenchida");
+
+  const model = (g.model || "gemini-2.5-flash").trim().replace(/^models\//,"");
+  const waits = [2000];
+
+  let last = null;
+  for(let attempt=0; attempt<=waits.length; attempt++){
+    try{
+      const t = await geminiCall(model, system, messages, g.key);
+      AI.googleUsed = model;
+      return t;
+    }catch(e){
+      last = e;
+      if(!e.transient) throw e;                 // erro permanente: não insiste
+      if(attempt < waits.length) await sleep(waits[attempt]);
+    }
+  }
+  throw new Error(last.message+" em \u201C"+model+"\u201D — tentei "+(waits.length+1)+
+                  " vezes. Costuma ser passageiro; se persistir, escolha outro modelo.");
+}
+
+/* lista os modelos que a chave realmente pode usar */
+async function listGeminiModels(key){
+  const url = "https://generativelanguage.googleapis.com/v1beta/models";
+  let r;
+  try{
+    r = await fetch(url,{headers:{"x-goog-api-key":key}});
+  }catch(e){
+    try{ r = await fetch(url+"?key="+encodeURIComponent(key)); }
+    catch(e2){ throw new Error("conexão bloqueada por este ambiente"); }
+  }
+  const d = await r.json().catch(()=>null);
+  if(!r.ok) throw new Error((d && d.error && d.error.message) || ("HTTP "+r.status));
+  return (d.models||[])
+    .filter(m => (m.supportedGenerationMethods||[]).indexOf("generateContent") > -1)
+    .map(m => String(m.name||"").replace(/^models\//,""))
+    .filter(n => /^(gemini|gemma)/.test(n))
+    .sort();
+}
+
 /* --- Endpoint próprio, compatível com OpenAI --- */
 async function pCustom(system, messages){
   const c = AI.custom;
@@ -1164,6 +1344,7 @@ async function pCustom(system, messages){
 
 const PROVIDERS = {
   anthropic:   {label:"Anthropic",    fn:pAnthropic},
+  google:      {label:"Google Gemini", fn:pGoogle, timeout:70000},
   puter:       {label:"Puter.js",     fn:pPuter},
   pollinations:{label:"Pollinations", fn:pPollinations},
   custom:      {label:"Endpoint próprio", fn:pCustom}
@@ -1173,6 +1354,7 @@ function providerChain(){
   if(AI.mode !== "auto") return [AI.mode];
   const list = [];
   if(AI.custom.url) list.push("custom");
+  if(AI.google.key) list.push("google");
   if(AI.active) list.push(AI.active);
   return list.concat(AI.order);
 }
@@ -1180,7 +1362,10 @@ function providerChain(){
 function paintAI(){
   const el = $("aiStatus");
   if(!el) return;
-  if(AI.active) el.textContent = PROVIDERS[AI.active].label;
+  if(AI.active){
+    el.textContent = PROVIDERS[AI.active].label +
+      (AI.active === "google" && AI.googleUsed ? " · "+AI.googleUsed : "");
+  }
   else if(AI.mode !== "auto") el.textContent = PROVIDERS[AI.mode].label+" (não testado)";
   else el.textContent = "detectando…";
 }
@@ -1194,7 +1379,8 @@ async function askLLM(messages, system, opts){
     tried.add(id);
     if(AI.mode === "auto" && AI.dead[id]) continue;
     try{
-      const t = await withTimeout(PROVIDERS[id].fn(system, messages, opts), 35000, PROVIDERS[id].label);
+      const t = await withTimeout(PROVIDERS[id].fn(system, messages, opts),
+                                  PROVIDERS[id].timeout || 35000, PROVIDERS[id].label);
       AI.active = id; paintAI();
       return t;
     }catch(e){
@@ -1221,14 +1407,37 @@ async function loadAIPrefs(){
     const j = JSON.parse(r.value);
     AI.mode = j.mode || "auto";
     AI.custom = Object.assign({url:"",model:"",key:""}, j.custom||{});
+    AI.google = Object.assign({key:"",model:""}, j.google||{});
   }catch(e){}
   syncAIForm(); paintAI();
 }
 async function saveAIPrefs(){
   try{
     if(typeof window.storage === "undefined") return;
-    await window.storage.set("vozli:ai", JSON.stringify({mode:AI.mode, custom:AI.custom}));
+    await window.storage.set("vozli:ai", JSON.stringify({mode:AI.mode, custom:AI.custom, google:AI.google}));
   }catch(e){}
+}
+
+const GEMINI_DEFAULTS = ["gemini-3.8-flash","gemini-3-flash-preview","gemini-2.5-flash","gemini-2.5-flash-lite","gemini-2.5-pro"];
+
+function setModelOptions(list, selected){
+  const sel = $("gModelSel");
+  const opts = list.slice();
+  if(selected && opts.indexOf(selected) === -1) opts.unshift(selected);
+  sel.innerHTML = opts.map(n=>'<option value="'+escapeHtml(n)+'">'+escapeHtml(n)+'</option>').join("")
+                + '<option value="__custom">Outro — digitar manualmente</option>';
+  sel.value = (selected && opts.indexOf(selected) > -1) ? selected : opts[0];
+  $("gModel").hidden = true;
+}
+function currentModel(){
+  const sel = $("gModelSel");
+  return sel.value === "__custom" ? $("gModel").value.trim() : sel.value;
+}
+
+function toggleAIBoxes(){
+  const m = $("aiMode").value;
+  $("customBox").hidden = m !== "custom";
+  $("googleBox").hidden = !(m === "google" || (m === "auto" && AI.google.key));
 }
 
 function syncAIForm(){
@@ -1236,11 +1445,14 @@ function syncAIForm(){
   $("aiUrl").value = AI.custom.url;
   $("aiModel").value = AI.custom.model;
   $("aiKey").value = AI.custom.key;
-  $("customBox").hidden = $("aiMode").value !== "custom";
+  $("gKey").value = AI.google.key;
+  setModelOptions(AI.googleList && AI.googleList.length ? AI.googleList : GEMINI_DEFAULTS, AI.google.model);
+  toggleAIBoxes();
 }
 function readAIForm(){
   AI.mode = $("aiMode").value;
   AI.custom = {url:$("aiUrl").value.trim(), model:$("aiModel").value.trim(), key:$("aiKey").value.trim()};
+  AI.google = {key:$("gKey").value.trim(), model:currentModel()};
   AI.dead = {}; AI.active = null;
 }
 
@@ -1252,19 +1464,52 @@ function aiMsg(text, kind){
 
 $("aiBtn").addEventListener("click", ()=>{ closePlan(); syncAIForm(); aiMsg(""); $("aiVeil").classList.add("on"); });
 $("aiClose").addEventListener("click", ()=> $("aiVeil").classList.remove("on"));
-$("aiMode").addEventListener("change", ()=>{ $("customBox").hidden = $("aiMode").value !== "custom"; });
+$("aiMode").addEventListener("change", ()=>{
+  AI.google.key = $("gKey").value.trim();
+  toggleAIBoxes();
+});
 $("aiSave").addEventListener("click", async ()=>{
   readAIForm(); await saveAIPrefs(); paintAI();
   aiMsg("Preferências salvas.","ok");
 });
+$("gModelSel").addEventListener("change", ()=>{
+  const custom = $("gModelSel").value === "__custom";
+  $("gModel").hidden = !custom;
+  if(custom) $("gModel").focus();
+});
+
+$("gList").addEventListener("click", async ()=>{
+  const key = $("gKey").value.trim();
+  if(!key){ aiMsg("Preencha a chave primeiro.","err"); return; }
+  aiMsg("Consultando os modelos da sua chave…");
+  try{
+    const list = await listGeminiModels(key);
+    if(!list.length){ aiMsg("A chave não retornou nenhum modelo de geração de texto.","err"); return; }
+    AI.googleList = list;
+    const atual = currentModel();
+    setModelOptions(list, list.indexOf(atual) > -1 ? atual : null);
+    aiMsg(list.length+" modelos liberados para esta chave. A lista acima agora mostra só os que funcionam"+
+          (list.indexOf(atual) === -1 ? " — o anterior não estava entre eles." : "."), "ok");
+  }catch(e){
+    aiMsg("Não consegui listar: "+e.message,"err");
+  }
+});
+
 $("aiCheck").addEventListener("click", async ()=>{
   readAIForm(); await saveAIPrefs();
   aiMsg("Testando…");
   try{
     const t = await askLLM([{role:"user",content:"Responda apenas com a palavra: ok"}], "You answer with a single lowercase word.");
-    aiMsg("Conectado por "+PROVIDERS[AI.active].label+". Resposta: "+t.slice(0,40),"ok");
+    const via = PROVIDERS[AI.active].label + (AI.active === "google" && AI.googleUsed ? " ("+AI.googleUsed+")" : "");
+    aiMsg("Conectado por "+via+". Resposta: "+t.slice(0,40),"ok");
   }catch(e){
-    aiMsg("Nenhum provedor respondeu. "+e.message,"err");
+    let m = "Falhou. "+e.message;
+    if(/bloquead|failed to fetch|networkerror|load failed/i.test(e.message)){
+      m += " — janelas embutidas normalmente barram chamadas para fora. Teste na página publicada ou em uma aba própria do navegador.";
+    }else if(/não respondeu|congestionad|demorou|limite de uso/i.test(e.message)){
+      m += " — escolha um modelo mais leve na lista, como um “flash-lite”, que costuma responder mesmo em horário de pico.";
+    }
+    aiMsg(m,"err");
   }
 });
 
