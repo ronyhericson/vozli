@@ -1,0 +1,1427 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VozLi — treino de inglês em 10 minutos</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 30 30%27%3E%3Cpath d=%27M2 3H28V22H11L5 28V22H2Z%27 fill=%27%232B55A8%27/%3E%3Cg fill=%27white%27%3E%3Crect x=%276%27 y=%279.5%27 width=%273%27 height=%276%27/%3E%3Crect x=%2711%27 y=%276.5%27 width=%273%27 height=%2712%27/%3E%3Crect x=%2716%27 y=%278.5%27 width=%273%27 height=%278%27/%3E%3Crect x=%2721%27 y=%2710.5%27 width=%273%27 height=%274%27/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Serif:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper:#F1F5FB;
+    --panel:#E5EBF6;
+    --surface:#FFFFFF;
+    --ink:#15233C;
+    --muted:#5E6D89;
+    --line:#CBD6E8;
+    --blue:#2B55A8;
+    --blue-deep:#1D3D7A;
+    --soft:#DCE6F7;
+    --soft-line:#B8C9EA;
+    --alert:#9C4358;
+    --alert-soft:#F1E1E5;
+    --alert-line:#DCBCC5;
+    --sans:"IBM Plex Sans",system-ui,sans-serif;
+    --serif:"IBM Plex Serif",Georgia,serif;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --r:3px;
+  }
+
+  *{box-sizing:border-box}
+  html{height:100%}
+  body{
+    height:100vh;
+    height:100dvh;
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  button{font-family:inherit;cursor:pointer}
+  :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+  /* ---------- header ---------- */
+  header{
+    display:flex;align-items:center;gap:20px;
+    padding:13px 22px 12px;
+    border-bottom:1px solid var(--line);
+    background:var(--surface);
+    flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:11px;margin-right:auto}
+  .mark{width:27px;height:27px;flex:none;display:block}
+  .bwords{display:flex;align-items:baseline;gap:11px;min-width:0}
+  .brand h1{
+    font-family:var(--sans);font-weight:600;
+    font-size:24px;letter-spacing:-.025em;margin:0;line-height:1;white-space:nowrap;
+  }
+  .brand h1 em{font-style:normal;font-weight:300;letter-spacing:-.01em}
+  .brand p{margin:0;font-size:12.5px;color:var(--muted);letter-spacing:.01em}
+
+  .clock{text-align:right}
+  .actions{display:flex;align-items:center;gap:8px}
+  .digits{
+    font-family:var(--mono);
+    font-size:36px;font-weight:500;letter-spacing:-.03em;
+    font-variant-numeric:tabular-nums;line-height:1;
+    transition:color .3s;
+  }
+  .digits.warn{color:var(--alert)}
+  .clock small{display:block;font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.02em;margin-top:5px}
+
+  .btn{
+    border:1px solid var(--ink);background:transparent;color:var(--ink);
+    padding:9px 15px;border-radius:var(--r);font-size:14px;font-weight:500;
+    transition:background .14s,color .14s,border-color .14s;
+  }
+  .btn:hover{background:var(--ink);color:var(--surface)}
+  .btn.solid{background:var(--blue);border-color:var(--blue);color:#fff}
+  .btn.solid:hover{background:var(--blue-deep);border-color:var(--blue-deep)}
+  .btn.ghost{border-color:var(--line);color:var(--muted);background:var(--surface);padding:8px 13px;font-size:13px}
+  .btn.ghost:hover{background:var(--soft);color:var(--blue);border-color:var(--soft-line)}
+  .btn[disabled]{opacity:.38;pointer-events:none}
+
+  .rail{height:4px;background:var(--panel);position:relative;flex:none}
+  .rail i{
+    display:block;height:100%;width:0%;
+    background:var(--blue);
+    transition:width 1s linear;
+  }
+
+  /* ---------- layout ---------- */
+  main{flex:1;display:flex;min-height:0}
+
+  aside{
+    width:296px;flex:none;border-right:1px solid var(--line);
+    padding:20px;overflow-y:auto;background:var(--panel);
+  }
+  .plan-head{
+    font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);
+    margin:0 0 14px;padding-bottom:9px;border-bottom:1px solid var(--line);
+  }
+
+  ol.stages{list-style:none;margin:0 0 22px;padding:0;position:relative}
+  ol.stages:before{content:"";position:absolute;left:11px;top:14px;bottom:14px;width:1px;background:var(--line)}
+  ol.stages li{position:relative;padding:0 0 16px 34px}
+  .dot{
+    position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:2px;
+    background:var(--surface);border:1px solid var(--line);
+    display:grid;place-items:center;font-family:var(--mono);font-size:11px;color:var(--muted);
+    transition:.2s;
+  }
+  li.now .dot{background:var(--blue);border-color:var(--blue);color:#fff}
+  li.done .dot{background:var(--soft);border-color:var(--soft-line);color:var(--blue-deep)}
+  .st-name{font-size:14.5px;font-weight:500;line-height:1.3}
+  li.now .st-name{color:var(--blue)}
+  .st-meta{font-size:12px;color:var(--muted);margin-top:1px}
+  .lvl{
+    display:inline-block;font-family:var(--mono);font-size:10px;padding:1px 5px;border-radius:2px;
+    background:var(--soft);color:var(--blue-deep);margin-left:6px;letter-spacing:.02em;
+    border:1px solid var(--soft-line);
+  }
+
+  .score{display:flex;gap:1px;margin-bottom:20px;border:1px solid var(--line);background:var(--line)}
+  .score div{flex:1;padding:10px 11px;background:var(--surface)}
+  .score b{display:block;font-family:var(--mono);font-size:21px;font-weight:500;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .score span{font-size:11px;color:var(--muted)}
+
+  .src-box{border-top:1px solid var(--line);padding-top:14px}
+  .src-box p{font-size:12.5px;color:var(--muted);margin:0 0 10px;line-height:1.45}
+
+  /* ---------- chat ---------- */
+  .chat{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--paper)}
+
+  .minibar{
+    display:none;width:100%;align-items:center;gap:10px;text-align:left;
+    padding:9px 16px;background:var(--panel);border:none;border-bottom:1px solid var(--line);
+    color:var(--ink);font-family:var(--sans);flex:none;
+  }
+  .minibar:active{background:var(--soft)}
+  .mb-txt{flex:1;min-width:0}
+  .mb-step{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--muted)}
+  .mb-name{display:block;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mb-score{font-family:var(--mono);font-size:12px;color:var(--muted);flex:none;font-variant-numeric:tabular-nums}
+  .minibar svg{color:var(--muted);flex:none}
+
+  .planClose{display:none;margin-bottom:14px}
+
+  #stream{flex:1;overflow-y:auto;padding:24px 24px 8px;scroll-behavior:smooth}
+  .wrap{max-width:660px;margin:0 auto}
+
+  .msg{margin-bottom:16px;display:flex;flex-direction:column;max-width:86%}
+  .msg.me{margin-left:auto;align-items:flex-end}
+  .who{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.03em;margin-bottom:5px}
+
+  .bubble{
+    padding:13px 16px;border-radius:var(--r);
+    background:var(--surface);border:1px solid var(--line);
+    font-size:15.5px;
+    border-left:3px solid var(--line);
+    animation:rise .25s ease both;
+  }
+  .me .bubble{
+    background:var(--blue);border-color:var(--blue);border-left-color:var(--blue-deep);color:#fff;
+  }
+  .bubble.good{background:var(--soft);border-color:var(--soft-line);border-left-color:var(--blue)}
+  .bubble.bad{background:var(--alert-soft);border-color:var(--alert-line);border-left-color:var(--alert)}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.bubble{animation:none}}
+
+  .en{font-family:var(--serif);font-weight:500;font-size:16.5px}
+  .task{font-family:var(--serif);font-weight:600;font-size:23px;line-height:1.28;letter-spacing:-.01em;display:block;margin:6px 0 3px}
+  .cue{font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.01em}
+  .me .cue{color:rgba(255,255,255,.72)}
+  .bubble hr{border:0;border-top:1px solid var(--line);margin:11px 0}
+  .bubble.good hr{border-top-color:var(--soft-line)}
+  .bubble.bad hr{border-top-color:var(--alert-line)}
+  .fix{font-family:var(--serif);font-weight:600;color:var(--alert)}
+
+  .typing span{
+    display:inline-block;width:6px;height:6px;border-radius:1px;background:var(--muted);
+    margin-right:4px;animation:bob 1.1s infinite;
+  }
+  .typing span:nth-child(2){animation-delay:.15s}
+  .typing span:nth-child(3){animation-delay:.3s}
+  @keyframes bob{0%,60%,100%{opacity:.25;transform:none}30%{opacity:1;transform:translateY(-4px)}}
+
+  /* ---------- composer ---------- */
+  .composer{border-top:1px solid var(--line);padding:13px 24px 16px;background:var(--surface)}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+  .field{display:flex;gap:9px;align-items:flex-end}
+  textarea{
+    flex:1;resize:none;font-family:var(--serif);font-size:16.5px;font-weight:400;
+    padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);
+    background:var(--surface);color:var(--ink);line-height:1.4;max-height:130px;
+  }
+  textarea:focus{border-color:var(--blue);outline:none;box-shadow:inset 0 0 0 1px var(--blue)}
+  textarea::placeholder{font-family:var(--sans);font-size:14.5px;color:#93A0B6}
+  .send{
+    width:46px;height:46px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;
+    display:grid;place-items:center;flex:none;transition:background .14s;
+  }
+  .send:hover{background:var(--blue-deep)}
+
+  .mic{
+    width:46px;height:46px;border-radius:var(--r);flex:none;position:relative;
+    border:1px solid var(--line);background:var(--surface);color:var(--ink);
+    display:grid;place-items:center;transition:border-color .14s,color .14s;
+  }
+  .mic:hover{border-color:var(--blue);color:var(--blue)}
+  .mic b{
+    position:absolute;bottom:-1px;right:-1px;font-family:var(--mono);font-size:9px;line-height:1.4;
+    background:var(--ink);color:var(--surface);border-radius:2px 0 var(--r) 0;padding:0 4px;
+    letter-spacing:.03em;
+  }
+
+  .field.hide{display:none}
+  .recbar{
+    display:none;align-items:center;gap:11px;
+    border:1px solid var(--alert-line);border-left:3px solid var(--alert);
+    background:var(--alert-soft);border-radius:var(--r);
+    padding:7px 7px 7px 13px;
+  }
+  .recbar.on{display:flex}
+  .rbtn{
+    width:38px;height:38px;border-radius:var(--r);border:none;background:transparent;color:var(--alert);
+    display:grid;place-items:center;flex:none;
+  }
+  .rbtn:hover{background:rgba(156,67,88,.12)}
+  .bars{display:flex;gap:3px;align-items:center;height:22px;flex:none}
+  .bars i{width:3px;height:40%;background:var(--alert);animation:eq .9s infinite ease-in-out}
+  .bars i:nth-child(2){animation-delay:.12s}
+  .bars i:nth-child(3){animation-delay:.24s}
+  .bars i:nth-child(4){animation-delay:.36s}
+  .bars i:nth-child(5){animation-delay:.48s}
+  @keyframes eq{0%,100%{height:25%}50%{height:100%}}
+  @media (prefers-reduced-motion:reduce){.bars i{animation:none;height:60%}}
+  .rtx{
+    flex:1;min-width:0;font-family:var(--serif);font-size:15px;color:#7B3548;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .rtime{font-family:var(--mono);font-size:13px;color:var(--alert);font-variant-numeric:tabular-nums;flex:none}
+  .send.rose{background:var(--alert);width:38px;height:38px}
+  .send.rose:hover{background:#7E3546}
+
+  .spk{
+    border:none;background:none;padding:0 0 0 7px;color:#9FADC4;line-height:0;
+    vertical-align:-3px;transition:color .14s;
+  }
+  .spk:hover{color:var(--blue)}
+  .spk.on{color:var(--blue)}
+
+  /* ---------- footer ---------- */
+  footer{
+    flex:none;display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:9px 22px;border-top:1px solid var(--line);background:var(--panel);
+    font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.01em;
+  }
+  footer strong{font-weight:500;color:var(--ink)}
+  footer sup{font-size:8px;vertical-align:super}
+
+  /* ---------- overlay ---------- */
+  .veil{
+    position:fixed;inset:0;background:rgba(21,35,60,.55);
+    display:none;place-items:center;padding:24px;z-index:40;
+  }
+  .veil.on{display:grid}
+  .card{
+    background:var(--paper);border:1px solid var(--line);border-top:4px solid var(--blue);
+    border-radius:var(--r);padding:30px;max-width:480px;width:100%;
+    max-height:88vh;overflow-y:auto;
+  }
+  .card h2{font-family:var(--sans);font-weight:600;font-size:26px;margin:0 0 6px;letter-spacing:-.02em;line-height:1.15}
+  .card h2 em{font-style:normal;color:var(--blue)}
+  .card p{color:var(--muted);font-size:14.5px;margin:0 0 20px}
+
+  .tally{display:flex;gap:1px;margin-bottom:22px;border:1px solid var(--line);background:var(--line)}
+  .tally div{flex:1;background:var(--surface);padding:13px}
+  .tally b{display:block;font-family:var(--mono);font-size:24px;font-weight:500;letter-spacing:-.02em}
+  .tally span{font-size:11.5px;color:var(--muted)}
+
+  .card ul{list-style:none;padding:0;margin:0 0 20px}
+  .card li{padding:12px 0;border-top:1px solid var(--line)}
+  .card li a{color:var(--blue);text-decoration:none;font-weight:500;font-size:15px}
+  .card li a:hover{text-decoration:underline}
+  .card li p{margin:3px 0 0;font-size:13px;line-height:1.45}
+
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+  .sec{margin-bottom:20px}
+  .sec h3{
+    font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.06em;
+    color:var(--muted);margin:0 0 8px;
+  }
+  .sec ul{list-style:none;padding:0;margin:0}
+  .sec li{
+    padding:9px 0 9px 14px;border-top:none;border-left:3px solid var(--line);
+    font-size:14.5px;line-height:1.45;margin-bottom:3px;background:var(--surface);
+    padding-right:12px;
+  }
+  .sec.up li{border-left-color:var(--blue)}
+  .sec.down li{border-left-color:var(--alert)}
+  .sec.how li{border-left-color:var(--ink)}
+  .sec li em{font-style:normal;font-family:var(--serif);font-weight:600}
+
+  .revw{border:1px solid var(--line);background:var(--surface)}
+  .revw div{display:flex;gap:10px;padding:9px 12px;font-size:13.5px;border-top:1px solid var(--line)}
+  .revw div:first-child{border-top:none}
+  .revw b{flex:1;font-weight:400;color:var(--muted)}
+  .revw span{flex:1;font-family:var(--serif);font-weight:600;color:var(--alert)}
+
+  .sw{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--muted);margin-bottom:18px}
+  .sw input{width:16px;height:16px;accent-color:var(--blue)}
+
+  /* ---------- mobile ---------- */
+  @media (max-width:860px){
+    header{padding:10px 14px 9px;gap:8px 12px;row-gap:9px}
+    .brand{margin-right:auto}
+    .mark{width:23px;height:23px}
+    .brand h1{font-size:21px}
+    .brand p{display:none}
+    .clock{text-align:right}
+    .digits{font-size:25px}
+    .clock small{font-size:9.5px;margin-top:3px}
+    .actions{width:100%;gap:6px}
+    .actions .btn{flex:1;padding:11px 8px;font-size:13.5px;text-align:center}
+
+    .minibar{display:flex}
+
+    main{position:relative}
+    aside{
+      position:fixed;inset:0;z-index:35;width:100%;max-height:none;
+      border-right:none;padding:18px 18px calc(24px + env(safe-area-inset-bottom));
+      display:none;
+    }
+    body.plan-open aside{display:block}
+    .planClose{display:inline-block}
+    ol.stages li{padding-bottom:16px}
+
+    #stream{padding:16px 14px 4px}
+    .msg{max-width:93%}
+    .bubble{font-size:15px}
+    .task{font-size:20px;margin:5px 0 2px}
+
+    .composer{padding:10px 14px 12px}
+    footer{
+      flex-direction:column;align-items:center;text-align:center;gap:1px;
+      font-size:10px;padding:7px 14px calc(8px + env(safe-area-inset-bottom));
+    }
+    .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-bottom:9px}
+    .chips::-webkit-scrollbar{display:none}
+    .chips .btn{flex:none}
+    textarea{font-size:16px;padding:11px 12px}
+
+    .veil{padding:14px}
+    .card{padding:22px 18px;max-height:92vh}
+    .card h2{font-size:22px}
+    .tally b{font-size:20px}
+    .row .btn{flex:1 1 auto;text-align:center}
+    .revw div{flex-direction:column;gap:2px}
+  }
+
+  @media (max-width:430px){
+    .mark{width:21px;height:21px}
+    .brand h1{font-size:19px}
+    .digits{font-size:23px}
+    .actions .btn{font-size:13px;padding:10px 6px}
+    .mic,.send{width:44px;height:44px}
+    .field{gap:7px}
+    .tally div{padding:10px 8px}
+    .tally b{font-size:18px}
+    .tally span{font-size:10.5px}
+    .tm-note{display:none}
+  }
+</style>
+
+<header>
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 30 30" aria-hidden="true">
+      <path d="M2 3H28V22H11L5 28V22H2Z" fill="var(--blue)"/>
+      <g fill="#fff">
+        <rect x="6" y="9.5" width="3" height="6"/>
+        <rect x="11" y="6.5" width="3" height="12"/>
+        <rect x="16" y="8.5" width="3" height="8"/>
+        <rect x="21" y="10.5" width="3" height="4"/>
+      </g>
+    </svg>
+    <div class="bwords">
+      <h1>Voz<em>Li</em></h1>
+      <p>treino de inglês · 10 minutos</p>
+    </div>
+  </div>
+  <div class="clock">
+    <div class="digits" id="digits">10:00</div>
+    <small id="clockLabel">pronto para começar</small>
+  </div>
+  <div class="actions">
+    <button class="btn solid" id="startBtn">Iniciar treino</button>
+    <button class="btn ghost" id="pauseBtn" disabled>Pausar</button>
+    <button class="btn ghost" id="resetBtn" hidden>Reiniciar cronômetro</button>
+  </div>
+</header>
+<div class="rail"><i id="railFill"></i></div>
+
+<main>
+  <aside>
+    <button class="btn ghost planClose" id="planClose">Voltar ao treino</button>
+    <p class="plan-head">plano da sessão</p>
+    <ol class="stages" id="stageList"></ol>
+
+    <div class="score">
+      <div><b id="nCorrect">0</b><span>acertos</span></div>
+      <div><b id="nTotal">0</b><span>respostas</span></div>
+      <div><b id="nStreak">0</b><span>seguidas</span></div>
+    </div>
+
+    <div class="src-box" style="margin-bottom:16px">
+      <label class="sw" style="margin:0">
+        <input type="checkbox" id="autoSpeak" checked>
+        Ouvir o James automaticamente
+      </label>
+    </div>
+
+    <div class="src-box">
+      <p>Vocabulário e frases seguem as listas oficiais do Oxford 3000 e do Cambridge English, alinhadas ao CEFR.</p>
+      <button class="btn ghost" id="srcBtn">Ver fontes</button>
+    </div>
+  </aside>
+
+  <section class="chat">
+    <button class="minibar" id="miniBar">
+      <span class="mb-txt">
+        <span class="mb-step" id="mbStep">Etapa 1 de 5</span>
+        <span class="mb-name" id="mbName">Palavras essenciais</span>
+      </span>
+      <span class="mb-score" id="mbScore">0 acertos</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div id="stream"><div class="wrap" id="wrap"></div></div>
+
+    <div class="composer">
+      <div class="chips" id="chips"></div>
+      <div class="field" id="fieldMain">
+        <textarea id="input" rows="1" placeholder="Clique em “Iniciar treino” para começar" disabled></textarea>
+        <button class="mic" id="micBtn" disabled title="Falar a resposta" aria-label="Gravar resposta falada">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></svg>
+          <b id="micLang">EN</b>
+        </button>
+        <button class="send" id="sendBtn" disabled aria-label="Enviar resposta">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <div class="recbar" id="recBar">
+        <button class="rbtn" id="recCancel" aria-label="Descartar gravação" title="Descartar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+        </button>
+        <div class="bars"><i></i><i></i><i></i><i></i><i></i></div>
+        <span class="rtx" id="recText">ouvindo…</span>
+        <span class="rtime" id="recTime">0:00</span>
+        <button class="send rose" id="recStop" aria-label="Converter em texto e enviar" title="Enviar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l6 6L20 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>© 2026 <strong>VozLi</strong><sup>®</sup><span class="tm-note"> · marca registrada</span></span>
+  <span>Desenvolvido por <strong>Rony Hericson dos Santos</strong></span>
+</footer>
+
+<div class="veil" id="endVeil">
+  <div class="card">
+    <h2>Tempo de estudo encerrado<em>.</em></h2>
+    <p id="endLine">Dez minutos completos. Veja como foi.</p>
+    <div class="tally">
+      <div><b id="eCorrect">0</b><span>acertos</span></div>
+      <div><b id="eRate">0%</b><span>aproveitamento</span></div>
+      <div><b id="eStage">1</b><span>etapa alcançada</span></div>
+    </div>
+    <p id="endTip" style="color:var(--ink);font-size:15px"></p>
+    <div class="row">
+      <button class="btn solid" id="againBtn">Começar de novo</button>
+      <button class="btn" id="reportBtn">Relatório da sessão</button>
+      <button class="btn ghost" id="closeEnd">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="veil" id="repVeil">
+  <div class="card">
+    <h2>Relatório da sessão<em>.</em></h2>
+    <p id="repHeadline">Analisando suas respostas…</p>
+    <div id="repBody">
+      <div class="bubble typing" style="display:inline-block"><span></span><span></span><span></span></div>
+    </div>
+    <div class="row" style="margin-top:24px">
+      <button class="btn solid" id="repAgain">Treinar de novo</button>
+      <button class="btn ghost" id="closeRep">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="veil" id="srcVeil">
+  <div class="card">
+    <h2>De onde vem o conteúdo</h2>
+    <p>As palavras, os níveis e as frases desta sessão foram compilados destas referências oficiais de ensino de inglês.</p>
+    <ul>
+      <li>
+        <a href="https://www.oxfordlearnersdictionaries.com/wordlists/oxford3000-5000" target="_blank" rel="noopener">Oxford 3000 &amp; Oxford 5000 — Oxford Learner's Dictionaries</a>
+        <p>Lista das 3.000 palavras mais importantes do inglês, escolhidas pela frequência no Oxford English Corpus e com cada palavra classificada de A1 a B2 no CEFR.</p>
+      </li>
+      <li>
+        <a href="https://www.cambridgeenglish.org/Images/506886-a2-key-2020-vocabulary-list.pdf" target="_blank" rel="noopener">A2 Key Vocabulary List — Cambridge English</a>
+        <p>Vocabulário de nível A2, atualizado a partir do Cambridge Learner Corpus e do English Vocabulary Profile.</p>
+      </li>
+      <li>
+        <a href="https://www.cambridgeenglish.org/pl/Images/506887-b1-preliminary-vocabulary-list.pdf" target="_blank" rel="noopener">B1 Preliminary Vocabulary List — Cambridge English</a>
+        <p>Vocabulário receptivo e produtivo de nível B1, base das frases das etapas 4 e 5.</p>
+      </li>
+      <li>
+        <a href="https://www.englishprofile.org" target="_blank" rel="noopener">English Vocabulary Profile — English Profile</a>
+        <p>Banco com quase 7.000 verbetes, indicando o nível CEFR de cada palavra, expressão e phrasal verb.</p>
+      </li>
+      <li>
+        <a href="https://www.coe.int/en/web/common-european-framework-reference-languages" target="_blank" rel="noopener">Quadro Comum Europeu (CEFR) — Conselho da Europa</a>
+        <p>Os seis níveis A1–C2 que organizam a progressão desta sessão, descritos por aquilo que o aluno consegue fazer.</p>
+      </li>
+    </ul>
+    <label class="sw">
+      <input type="checkbox" id="webTool">
+      Deixar o professor consultar a web ao explicar um erro (respostas ficam mais lentas)
+    </label>
+    <button class="btn" id="closeSrc">Fechar</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   BANCO DE CONTEÚDO
+   Compilado de: Oxford 3000 (Oxford Learner's Dictionaries),
+   Cambridge English A2 Key / B1 Preliminary Vocabulary Lists,
+   English Vocabulary Profile. Níveis conforme o CEFR.
+   ============================================================ */
+
+const WORDS_A1 = [
+  ["water",["agua"]],["house",["casa"]],["food",["comida"]],["friend",["amigo","amiga"]],
+  ["book",["livro"]],["city",["cidade"]],["school",["escola"]],["family",["familia"]],
+  ["money",["dinheiro"]],["night",["noite"]],["morning",["manha"]],["name",["nome"]],
+  ["year",["ano"]],["week",["semana"]],["month",["mes"]],["car",["carro","automovel"]],
+  ["street",["rua"]],["door",["porta"]],["window",["janela"]],["table",["mesa"]],
+  ["chair",["cadeira"]],["bed",["cama"]],["kitchen",["cozinha"]],["job",["emprego","trabalho"]],
+  ["teacher",["professor","professora"]],["student",["aluno","estudante","aluna"]],
+  ["child",["crianca"]],["woman",["mulher"]],["man",["homem"]],["love",["amor","amar"]],
+  ["help",["ajuda","ajudar","socorro"]],["buy",["comprar"]],["eat",["comer"]],
+  ["drink",["beber","tomar","bebida"]],["sleep",["dormir","sono"]],["speak",["falar"]],
+  ["read",["ler"]],["write",["escrever"]],["listen",["ouvir","escutar"]],
+  ["walk",["andar","caminhar","caminhada"]],["run",["correr"]],["open",["abrir","aberto"]],
+  ["close",["fechar"]],["start",["comecar","iniciar","comeco"]],["finish",["terminar","acabar","finalizar"]],
+  ["big",["grande"]],["small",["pequeno","pequena"]],["good",["bom","boa"]],
+  ["bad",["ruim","mau","ma"]],["new",["novo","nova"]],["old",["velho","antigo","idoso"]],
+  ["happy",["feliz","alegre"]],["tired",["cansado","cansada"]],["cheap",["barato","barata"]],
+  ["expensive",["caro","cara"]],["today",["hoje"]],["tomorrow",["amanha"]],["yesterday",["ontem"]]
+];
+
+const WORDS_B1 = [
+  ["meeting",["reuniao","encontro"]],["advice",["conselho","conselhos"]],
+  ["improve",["melhorar","aprimorar"]],["borrow",["pegar emprestado","tomar emprestado"]],
+  ["lend",["emprestar"]],["hire",["contratar"]],["skill",["habilidade","competencia"]],
+  ["goal",["objetivo","meta","gol"]],["research",["pesquisa","pesquisar"]],
+  ["report",["relatorio","reportar"]],["customer",["cliente"]],["price",["preco"]],
+  ["salary",["salario"]],["agree",["concordar"]],["suggest",["sugerir"]],
+  ["explain",["explicar"]],["decide",["decidir"]],["allow",["permitir","deixar"]],
+  ["avoid",["evitar"]],["achieve",["alcancar","atingir","conquistar"]],
+  ["increase",["aumentar","aumento"]],["reduce",["reduzir","diminuir"]],
+  ["provide",["fornecer","oferecer","prover"]],["require",["exigir","requerer","precisar"]],
+  ["available",["disponivel"]],["reliable",["confiavel"]],["busy",["ocupado","ocupada"]],
+  ["careful",["cuidadoso","cauteloso"]],["safe",["seguro","segura"]],["health",["saude"]],
+  ["weather",["tempo","clima"]],["trip",["viagem"]],["flight",["voo"]],
+  ["luggage",["bagagem","mala","malas"]],["neighbour",["vizinho","vizinha"]],
+  ["mistake",["erro","engano"]],["reason",["motivo","razao"]],["meaning",["significado","sentido"]],
+  ["answer",["resposta","responder"]],["question",["pergunta","questao"]],
+  ["choose",["escolher"]],["remember",["lembrar","lembrar-se","recordar"]],
+  ["forget",["esquecer"]],["bring",["trazer"]],["keep",["manter","guardar","ficar com"]],
+  ["spend",["gastar","passar"]],["save",["economizar","poupar","salvar"]],
+  ["enough",["suficiente","bastante"]],["almost",["quase"]],["already",["ja"]],
+  ["still",["ainda"]],["however",["no entanto","porem","contudo","entretanto"]]
+];
+
+const SENT_A2 = [
+  ["Eu moro em São Paulo.",["i live in sao paulo"]],
+  ["Ela trabalha em um hospital.",["she works in a hospital","she works at a hospital"]],
+  ["Eu não gosto de café.",["i dont like coffee","i do not like coffee"]],
+  ["Onde você mora?",["where do you live"]],
+  ["Que horas são?",["what time is it"]],
+  ["Eu tenho dois irmãos.",["i have two brothers","i have got two brothers"]],
+  ["Nós vamos ao mercado amanhã.",["we are going to the market tomorrow","were going to the market tomorrow","we will go to the market tomorrow"]],
+  ["Ele está estudando inglês.",["he is studying english","hes studying english"]],
+  ["Quanto custa isso?",["how much is this","how much does this cost","how much is it"]],
+  ["Eu preciso de ajuda.",["i need help","i need some help"]],
+  ["Você pode falar mais devagar?",["can you speak more slowly","could you speak more slowly","can you speak slower"]],
+  ["Eu acordo às sete horas.",["i wake up at seven","i wake up at seven oclock"]],
+  ["Está chovendo hoje.",["its raining today","it is raining today"]],
+  ["Eu gostaria de um copo de água.",["id like a glass of water","i would like a glass of water"]],
+  ["Nós moramos perto da praia.",["we live near the beach","we live close to the beach"]]
+];
+
+const SENT_B1 = [
+  ["Eu trabalho nessa empresa há três anos.",["i have worked at this company for three years","ive worked at this company for three years","i have been working at this company for three years"]],
+  ["Se eu tivesse mais tempo, eu viajaria mais.",["if i had more time i would travel more","if i had more time id travel more"]],
+  ["Eu estava pensando em mudar de emprego.",["i was thinking about changing jobs","i was thinking of changing jobs"]],
+  ["Você poderia me enviar o relatório até sexta?",["could you send me the report by friday","could you send me the report by friday please"]],
+  ["Eu ainda não terminei o projeto.",["i havent finished the project yet","i have not finished the project yet"]],
+  ["Ela disse que chegaria atrasada.",["she said she would be late","she said that she would be late","she said she would arrive late"]],
+  ["Nós precisamos reduzir os custos.",["we need to reduce the costs","we need to reduce costs","we have to reduce the costs"]],
+  ["Eu costumava jogar futebol quando era criança.",["i used to play football when i was a child","i used to play soccer when i was a child","i used to play football when i was a kid"]],
+  ["Quanto mais eu pratico, melhor eu fico.",["the more i practise the better i get","the more i practice the better i get","the more i practice the better i become"]],
+  ["Eu não tenho certeza se isso vai funcionar.",["im not sure if this will work","i am not sure if this will work","im not sure whether this will work","im not sure if this is going to work"]]
+];
+
+/* ============================================================
+   ETAPAS
+   ============================================================ */
+
+const STAGES = [
+  {name:"Palavras essenciais", meta:"português → inglês", lvl:"A1", need:6, kind:"word", pool:WORDS_A1, dir:"pt2en"},
+  {name:"Palavras do dia a dia", meta:"inglês → português", lvl:"A2–B1", need:6, kind:"word", pool:WORDS_B1, dir:"en2pt"},
+  {name:"Frases curtas", meta:"traduza a frase inteira", lvl:"A2", need:5, kind:"sent", pool:SENT_A2, dir:"pt2en"},
+  {name:"Frases completas", meta:"tempos verbais e conectivos", lvl:"B1", need:4, kind:"sent", pool:SENT_B1, dir:"pt2en"},
+  {name:"Bate-papo livre", meta:"conversa com o professor", lvl:"B1+", need:99, kind:"chat"}
+];
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+
+const S = {
+  stage:0, item:null, queue:[], asked:0, hitInStage:0,
+  correct:0, total:0, streak:0, best:0,
+  running:false, secs:600, tick:null, revealed:false,
+  history:[], busy:false, useWeb:false, log:[], report:null
+};
+
+function logItem(entry){ S.log.push(entry); }
+
+const $ = id => document.getElementById(id);
+const wrap = $("wrap"), stream = $("stream"), input = $("input");
+
+/* ---------- utilidades de texto ---------- */
+function norm(s){
+  return (s||"")
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[’']/g,"")
+    .replace(/[^a-z0-9\s]/g," ")
+    .replace(/\s+/g," ").trim();
+}
+function stripLead(s){
+  return s.replace(/^(to|the|a|an|o|a|os|as|um|uma)\s+/,"");
+}
+function tokens(s){ return norm(s).split(" ").filter(Boolean); }
+
+function overlap(a,b){
+  const A=tokens(a), B=tokens(b);
+  if(!A.length||!B.length) return 0;
+  const bag=[...B];
+  let hit=0;
+  A.forEach(t=>{ const i=bag.indexOf(t); if(i>-1){hit++;bag.splice(i,1);} });
+  return hit/Math.max(A.length,B.length);
+}
+
+function checkLocal(item, ans){
+  const a = stripLead(norm(ans));
+  const accepted = item.accept.map(x=>stripLead(norm(x)));
+  if(accepted.some(x=>x===a)) return {verdict:"correct", local:true};
+  if(item.kind==="word"){
+    if(accepted.some(x=>x.split(" ").includes(a)||a.split(" ").includes(x))) return {verdict:"correct", local:true};
+    return {verdict:"unknown"};
+  }
+  const best = Math.max(...accepted.map(x=>overlap(x,a)));
+  if(best >= 0.92) return {verdict:"correct", local:true};
+  return {verdict:"unknown", score:best};
+}
+
+/* ---------- fila de itens ---------- */
+function buildQueue(st){
+  const pool = st.pool.slice();
+  for(let i=pool.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  return pool.map(p=>{
+    if(st.kind==="word"){
+      return st.dir==="pt2en"
+        ? {kind:"word", dir:"pt2en", prompt:p[1][0], accept:[p[0]], lvl:st.lvl, en:p[0], pt:p[1]}
+        : {kind:"word", dir:"en2pt", prompt:p[0], accept:p[1], lvl:st.lvl, en:p[0], pt:p[1]};
+    }
+    return {kind:"sent", dir:"pt2en", prompt:p[0], accept:p[1], lvl:st.lvl, en:p[1][0], pt:[p[0]]};
+  });
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+
+function renderStages(){
+  $("stageList").innerHTML = STAGES.map((s,i)=>{
+    const cls = i<S.stage ? "done" : i===S.stage ? "now" : "";
+    const mark = i<S.stage ? "✓" : (i+1);
+    return '<li class="'+cls+'"><span class="dot">'+mark+'</span>'+
+      '<span class="st-name">'+s.name+'<span class="lvl">'+s.lvl+'</span></span>'+
+      '<span class="st-meta">'+s.meta+'</span></li>';
+  }).join("");
+  if(document.getElementById("micLang")) paintMicLang();
+  const st = STAGES[S.stage];
+  $("mbStep").textContent = "Etapa "+(S.stage+1)+" de "+STAGES.length+" · "+st.lvl;
+  $("mbName").textContent = st.name;
+}
+
+function renderScore(){
+  $("nCorrect").textContent=S.correct;
+  $("nTotal").textContent=S.total;
+  $("nStreak").textContent=S.streak;
+  $("mbScore").textContent = S.correct+" acertos";
+}
+
+const SPK_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+
+function bubble(html, who, tone){
+  const el = document.createElement("div");
+  el.className = "msg" + (who==="me" ? " me" : "");
+  const spk = who==="me" ? "" : '<button class="spk" aria-label="Ouvir esta mensagem" title="Ouvir">'+SPK_ICON+'</button>';
+  el.innerHTML = '<span class="who">'+(who==="me"?"você":"James · professor")+spk+'</span>'+
+                 '<div class="bubble'+(tone?" "+tone:"")+'">'+html+'</div>';
+  wrap.appendChild(el);
+  stream.scrollTop = stream.scrollHeight;
+  if(who!=="me" && $("autoSpeak") && $("autoSpeak").checked){
+    const s = deriveSpeak(el);
+    if(s.lang==="en-US" && s.text) speak(s.text, s.lang, el.querySelector(".spk"));
+  }
+  return el;
+}
+
+function typing(){
+  const el = document.createElement("div");
+  el.className="msg";
+  el.innerHTML='<span class="who">James · professor</span><div class="bubble typing"><span></span><span></span><span></span></div>';
+  wrap.appendChild(el);
+  stream.scrollTop = stream.scrollHeight;
+  return el;
+}
+
+function setChips(list){
+  $("chips").innerHTML = list.map(c=>'<button class="btn ghost" data-act="'+c[0]+'">'+c[1]+'</button>').join("");
+}
+
+/* ============================================================
+   CRONÔMETRO
+   ============================================================ */
+
+function fmt(n){ const m=(n/60)|0, s=n%60; return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0"); }
+
+function paintClock(){
+  $("digits").textContent = fmt(S.secs);
+  $("digits").classList.toggle("warn", S.secs<=60);
+  $("railFill").style.width = ((600-S.secs)/600*100)+"%";
+}
+
+function setPaused(on){
+  $("resetBtn").hidden = !on;
+  if(!S.running) return;
+  input.disabled = on;
+  $("sendBtn").disabled = on;
+  $("micBtn").disabled = on;
+  input.placeholder = on
+    ? "Cronômetro pausado — retome para continuar respondendo"
+    : "Digite ou fale sua resposta — Enter envia";
+  if(on && recOn) cancelRec();
+  if(on) stopSpeech();
+}
+
+function startTimer(){
+  S.running=true;
+  $("clockLabel").textContent="sessão em andamento";
+  $("pauseBtn").disabled=false;
+  $("pauseBtn").textContent="Pausar";
+  setPaused(false);
+  clearInterval(S.tick);
+  S.tick = setInterval(()=>{
+    S.secs--;
+    paintClock();
+    if(S.secs===60) bubble('Um minuto restando. <span class="en">Let\'s make it count.</span>',"teacher");
+    if(S.secs<=0){ clearInterval(S.tick); endSession(); }
+  },1000);
+}
+
+function pauseTimer(){
+  if(!S.running) return;
+  if(S.tick){
+    clearInterval(S.tick); S.tick=null;
+    $("pauseBtn").textContent="Retomar";
+    $("clockLabel").textContent="pausado";
+    setPaused(true);
+  }
+  else startTimer();
+}
+
+function resetTimer(){
+  if(!S.running) return;
+  S.secs=600;
+  paintClock();
+  startTimer();
+  bubble('Cronômetro de volta em <strong>10:00</strong>. Seus acertos e a etapa continuam de onde pararam.<hr><span class="cue">Se quiser zerar também o progresso, use “Começar de novo” no fim da sessão.</span>',"teacher");
+}
+
+/* ============================================================
+   FLUXO DO TREINO
+   ============================================================ */
+
+function begin(){
+  if(typeof recOn!=="undefined" && recOn) cancelRec();
+  stopSpeech();
+  S.stage=0; S.correct=0; S.total=0; S.streak=0; S.asked=0; S.hitInStage=0;
+  S.secs=600; S.revealed=false; S.history=[]; S.log=[]; S.report=null;
+  $("endVeil").classList.remove("on"); $("repVeil").classList.remove("on");
+  document.body.classList.remove("plan-open");
+  wrap.innerHTML=""; paintClock(); renderStages(); renderScore();
+  $("startBtn").disabled=true; $("startBtn").textContent="Iniciar treino";
+  input.disabled=false; $("sendBtn").disabled=false; $("micBtn").disabled=false;
+  input.placeholder="Digite ou fale sua resposta — Enter envia";
+  startTimer();
+
+  bubble('Hello! Eu sou o <span class="en">James</span>, seu professor nesta sessão. Vamos por etapas: palavras soltas, depois frases, e no fim a gente conversa de verdade.<hr><span class="cue">Regra da casa: responda rápido, mesmo com medo de errar. Errar aqui é parte do treino.</span>',"teacher");
+  S.queue = buildQueue(STAGES[0]);
+  setTimeout(nextItem, 700);
+  input.focus();
+}
+
+function nextItem(){
+  const st = STAGES[S.stage];
+  if(st.kind==="chat"){ openChat(); return; }
+  if(!S.queue.length) S.queue = buildQueue(st);
+  S.item = S.queue.shift();
+  S.revealed=false;
+  askItem();
+}
+
+function askItem(){
+  const it = S.item;
+  let head, body;
+  if(it.kind==="word"){
+    if(it.dir==="pt2en"){
+      head='Como se diz em inglês:';
+      body='<span class="task">'+it.prompt+'</span>';
+    }else{
+      head='O que significa em português:';
+      body='<span class="task en">'+it.prompt+'</span>';
+    }
+  }else{
+    head='Traduza a frase para o inglês:';
+    body='<span class="task">'+it.prompt+'</span>';
+  }
+  bubble('<span class="cue">'+head+'</span>'+body+'<span class="cue">nível '+it.lvl+'</span>',"teacher");
+  setChips([["hint","Dica"],["reveal","Não sei"],["skip","Pular"]]);
+}
+
+function advanceCheck(){
+  const st = STAGES[S.stage];
+  if(S.hitInStage >= st.need || S.asked >= st.need+4){
+    S.stage++; S.hitInStage=0; S.asked=0;
+    renderStages();
+    const nx = STAGES[S.stage];
+    setTimeout(()=>{
+      bubble('<strong>Etapa concluída.</strong> Subindo para <strong>'+nx.name+'</strong> <span class="lvl">'+nx.lvl+'</span><br><span class="cue">'+nx.meta+'</span>',"teacher","good");
+      S.queue = nx.kind==="chat" ? [] : buildQueue(nx);
+      setTimeout(nextItem, 800);
+    }, 500);
+    return true;
+  }
+  return false;
+}
+
+async function answer(text){
+  if(S.busy) return;
+  const it = S.item;
+  bubble(escapeHtml(text),"me");
+  input.value="";
+  S.total++;
+
+  const res = checkLocal(it, text);
+
+  if(res.verdict==="correct"){
+    S.correct++; S.streak++; S.hitInStage++; S.asked++;
+    renderScore();
+    logItem({stage:S.stage, kind:it.kind, prompt:it.prompt, expected:it.en, answer:text, ok:true});
+    const praise = ["Correto.","Isso mesmo.","Perfeito.","Exato.","Boa."][S.streak%5];
+    let extra = it.kind==="word"
+      ? '<hr><span class="cue">também vale saber:</span> <span class="en">'+sampleUse(it)+'</span>'
+      : '';
+    bubble('<strong>'+praise+'</strong> <span class="en">'+it.en+'</span>'+extra,"teacher","good");
+    if(!advanceCheck()) setTimeout(nextItem, 750);
+    return;
+  }
+
+  // resposta não bateu localmente: pede o veredito ao professor
+  S.busy=true; setChips([]);
+  const t = typing();
+  const verdict = await judge(it, text);
+  t.remove(); S.busy=false;
+
+  logItem({stage:S.stage, kind:it.kind, prompt:it.prompt, expected:verdict.fix||it.en,
+           answer:text, ok:!!verdict.ok, note:verdict.note||""});
+
+  if(verdict.ok){
+    S.correct++; S.streak++; S.hitInStage++; S.asked++;
+    renderScore();
+    bubble('<strong>Também está certo.</strong> '+escapeHtml(verdict.note||"")+'<hr><span class="cue">forma mais comum:</span> <span class="en">'+it.en+'</span>',"teacher","good");
+    if(!advanceCheck()) setTimeout(nextItem, 750);
+  }else{
+    S.streak=0; S.asked++;
+    renderScore();
+    bubble('<strong>Ainda não.</strong> '+escapeHtml(verdict.note||"")+
+           '<hr><span class="cue">a forma correta é:</span> <span class="fix">'+escapeHtml(verdict.fix||it.en)+'</span>',"teacher","bad");
+    if(!advanceCheck()) setTimeout(nextItem, 1100);
+  }
+}
+
+function sampleUse(it){
+  const w = it.en;
+  const pats = ["I need a "+w+".","This "+w+" is important.","Can you "+w+" it?","We use the word “"+w+"” every day."];
+  return pats[(w.length)%pats.length];
+}
+
+/* ---------- etapa de conversa ---------- */
+function openChat(){
+  setChips([["ask","Fazer uma pergunta"],["tr","Como digo…?"],["easy","Mais devagar"]]);
+  input.placeholder="Responda em inglês — pode errar à vontade";
+  bubble('Última etapa: <strong>bate-papo livre</strong>. Daqui em diante eu falo em inglês, você responde em inglês, e eu corrijo o que precisar sem interromper a conversa.<hr><span class="en">So — tell me about your day. What did you do this morning?</span><br><span class="cue">(Conte sobre o seu dia. O que você fez hoje de manhã?)</span>',"teacher");
+  S.history=[{role:"assistant",content:"So — tell me about your day. What did you do this morning?"}];
+}
+
+async function chatTurn(text){
+  if(S.busy) return;
+  bubble(escapeHtml(text),"me");
+  input.value="";
+  S.total++; S.correct++; renderScore();
+  logItem({stage:S.stage, kind:"chat", prompt:"(conversa)", expected:"", answer:text, ok:true});
+  S.history.push({role:"user",content:text});
+  S.busy=true;
+  const t=typing();
+  const reply = await teacherReply();
+  t.remove(); S.busy=false;
+  S.history.push({role:"assistant",content:reply});
+  bubble(renderTeacherText(reply),"teacher");
+}
+
+function renderTeacherText(s){
+  return escapeHtml(s)
+    .replace(/\[\[(.+?)\]\]/g,'<span class="cue">($1)</span>')
+    .replace(/\n/g,"<br>")
+    .replace(/^(.*)$/, '<span class="en">$1</span>');
+}
+
+/* ============================================================
+   PROFESSOR (API)
+   ============================================================ */
+
+async function callClaude(messages, system, tools){
+  const body = { model:"claude-sonnet-4-6", max_tokens:1000, system, messages };
+  if(tools) body.tools = tools;
+  const r = await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)
+  });
+  const data = await r.json();
+  return (data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
+}
+
+async function judge(it, ans){
+  const direction = it.dir==="pt2en" ? "Portuguese to English" : "English to Portuguese";
+  const sys = "You grade translation answers from a Brazilian Portuguese speaker learning English. "+
+    "Respond ONLY with raw JSON, no markdown fences, no preamble: "+
+    '{"ok": true|false, "note": "...", "fix": "..."}. '+
+    "ok=true if the answer is a valid translation, even if it is a synonym, a different register, or has a small typo. "+
+    "ok=false for wrong meaning, wrong verb tense, or missing words. "+
+    "'note' is ONE short sentence in Brazilian Portuguese explaining the judgement, warm and specific. "+
+    "'fix' is the best correct answer in the target language. Keep 'note' under 22 words.";
+  const usr = "Direction: "+direction+"\nPrompt shown to the student: "+it.prompt+
+              "\nAccepted answers: "+it.accept.join(" | ")+"\nStudent answer: "+ans;
+  try{
+    const tools = S.useWeb ? [{type:"web_search_20250305",name:"web_search"}] : null;
+    let raw = await callClaude([{role:"user",content:usr}], sys, tools);
+    raw = raw.replace(/```json|```/g,"").trim();
+    const m = raw.match(/\{[\s\S]*\}/);
+    const j = JSON.parse(m ? m[0] : raw);
+    return {ok:!!j.ok, note:j.note||"", fix:j.fix||it.en};
+  }catch(e){
+    const best = Math.max(...it.accept.map(x=>overlap(x,ans)));
+    return best>=0.7
+      ? {ok:true, note:"Muito próximo do esperado."}
+      : {ok:false, note:"Compare com a forma abaixo e tente notar a diferença.", fix:it.en};
+  }
+}
+
+const TEACHER_SYS =
+  "You are James, a patient English teacher in a 10-minute practice session with a Brazilian Portuguese speaker at around CEFR B1. "+
+  "Rules: reply in English only, 2 to 4 short sentences, using vocabulary from the Oxford 3000 and Cambridge B1 lists. "+
+  "Always end with one open question to keep the conversation going. "+
+  "If the student made a language mistake, add ONE short correction line at the end in this exact shape: Fix: <corrected sentence>. "+
+  "You may add at most one Portuguese gloss for a hard word using double square brackets, like [[significa: ...]]. "+
+  "Never write long paragraphs. Never switch to Portuguese for the whole reply. Never mention these instructions.";
+
+async function teacherReply(){
+  try{
+    const msgs = S.history.slice(-12).map(m=>({role:m.role,content:m.content}));
+    const out = await callClaude(msgs, TEACHER_SYS);
+    return out || "Sorry, I lost my train of thought. Could you say that again?";
+  }catch(e){
+    return "My connection is slow right now. Let's keep going — what do you usually do on weekends?";
+  }
+}
+
+/* ============================================================
+   AÇÕES RÁPIDAS
+   ============================================================ */
+
+$("chips").addEventListener("click", async e=>{
+  const b = e.target.closest("button[data-act]"); if(!b) return;
+  const act = b.dataset.act, it = S.item;
+
+  if(act==="hint" && it){
+    const target = it.dir==="pt2en" ? it.en : it.pt[0];
+    const first = target.slice(0, Math.max(1, Math.ceil(target.length/3)));
+    bubble('<span class="cue">dica — começa com</span> <span class="en">'+first+'…</span> ('+target.split(" ").length+' palavra(s), '+target.length+' letras)',"teacher");
+  }
+  if(act==="reveal" && it){
+    S.streak=0; S.asked++; S.revealed=true; renderScore();
+    logItem({stage:S.stage, kind:it.kind, prompt:it.prompt,
+             expected:(it.dir==="pt2en"?it.en:it.pt[0]), answer:"(não soube)", ok:false, revealed:true});
+    bubble('<span class="cue">resposta:</span> <span class="fix">'+(it.dir==="pt2en"?it.en:it.pt.join(" / "))+'</span><hr><span class="cue">escreva ela uma vez antes de seguir — isso fixa muito mais que só ler.</span>',"teacher","bad");
+    if(!advanceCheck()) setTimeout(nextItem, 1400);
+  }
+  if(act==="skip" && it){ S.asked++; if(!advanceCheck()) nextItem(); }
+
+  if(act==="ask"){ input.value="Can I ask you something? "; input.focus(); }
+  if(act==="tr"){ input.value="How do I say '' in English?"; input.focus(); input.setSelectionRange(16,16); }
+  if(act==="easy"){ input.value="Could you say that in a simpler way, please?"; input.focus(); }
+});
+
+/* ============================================================
+   ENTRADA
+   ============================================================ */
+
+function submit(){
+  const v = input.value.trim();
+  if(!v || !S.running) return;
+  if(STAGES[S.stage].kind==="chat") chatTurn(v); else answer(v);
+}
+$("sendBtn").addEventListener("click", submit);
+input.addEventListener("keydown", e=>{
+  if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); submit(); }
+});
+input.addEventListener("input", ()=>{
+  input.style.height="auto";
+  input.style.height=Math.min(input.scrollHeight,130)+"px";
+});
+
+/* ============================================================
+   FIM DA SESSÃO
+   ============================================================ */
+
+function endSession(){
+  S.running=false;
+  if(recOn) cancelRec();
+  stopSpeech();
+  input.disabled=true; $("sendBtn").disabled=true; $("micBtn").disabled=true;
+  $("clockLabel").textContent="encerrado";
+  $("pauseBtn").disabled=true;
+  $("resetBtn").hidden=true;
+  $("startBtn").disabled=false;
+  $("startBtn").textContent="Começar de novo";
+  setChips([]);
+  input.placeholder="Sessão encerrada — comece de novo para praticar mais";
+  const rate = S.total ? Math.round(S.correct/S.total*100) : 0;
+  $("eCorrect").textContent=S.correct;
+  $("eRate").textContent=rate+"%";
+  $("eStage").textContent=(S.stage+1)+" de 5";
+  $("endTip").innerHTML = S.stage>=4
+    ? "Você chegou até a conversa livre. No próximo treino, tente responder ao James com duas frases em vez de uma."
+    : "Você parou em <strong>"+STAGES[S.stage].name+"</strong>. Uma sessão por dia vale mais que três num sábado — 10 minutos diários já mudam o resultado em algumas semanas.";
+  $("endVeil").classList.add("on");
+  saveBest(rate);
+}
+
+async function saveBest(rate){
+  try{
+    if(typeof window.storage === "undefined") return;
+    await window.storage.set("vozli:last", JSON.stringify({rate, correct:S.correct, stage:S.stage, at:Date.now()}));
+  }catch(e){}
+}
+
+/* ============================================================
+   RELATÓRIO DA SESSÃO
+   ============================================================ */
+
+function stageStats(){
+  const st={};
+  S.log.filter(l=>l.kind!=="chat").forEach(l=>{
+    st[l.stage]=st[l.stage]||{ok:0,n:0};
+    st[l.stage].n++; if(l.ok) st[l.stage].ok++;
+  });
+  return st;
+}
+
+function localReport(st){
+  const rate = S.total ? Math.round(S.correct/S.total*100) : 0;
+  const missed = S.log.filter(l=>!l.ok);
+  const reveals = missed.filter(l=>l.revealed).length;
+  const sentMiss = missed.filter(l=>l.kind==="sent").length;
+  const wordMiss = missed.filter(l=>l.kind==="word").length;
+  const keys = Object.keys(st);
+  let bestK=null, worstK=null;
+  keys.forEach(k=>{
+    const a=st[k].ok/st[k].n;
+    if(bestK===null||a>st[bestK].ok/st[bestK].n) bestK=k;
+    if(worstK===null||a<st[worstK].ok/st[worstK].n) worstK=k;
+  });
+
+  const strengths=[], improve=[], drills=[];
+
+  if(bestK!==null) strengths.push("Seu melhor momento foi em <em>"+STAGES[bestK].name+"</em>: "+st[bestK].ok+" de "+st[bestK].n+" respostas certas.");
+  if(rate>=70) strengths.push("Aproveitamento de "+rate+"% mantendo o ritmo dentro dos 10 minutos — velocidade e precisão juntas.");
+  if(S.stage>=2) strengths.push("Você saiu do vocabulário isolado e chegou a traduzir frases inteiras na mesma sessão.");
+  if(S.stage>=4) strengths.push("Chegou à conversa livre e produziu frases suas em inglês, sem tradução pronta.");
+  if(!strengths.length) strengths.push("Você começou. Uma sessão feita vale mais que um plano perfeito não executado.");
+
+  if(worstK!==null && st[worstK].ok<st[worstK].n)
+    improve.push("<em>"+STAGES[worstK].name+"</em> foi a etapa mais dura ("+st[worstK].ok+" de "+st[worstK].n+"). É onde o próximo treino deve começar.");
+  if(sentMiss>wordMiss && sentMiss>0)
+    improve.push("Você erra mais em frases do que em palavras soltas: o vocabulário está melhor que a montagem da frase.");
+  if(wordMiss>=sentMiss && wordMiss>0)
+    improve.push("A maior parte dos erros foi de vocabulário isolado — faltam palavras na ponta da língua, não gramática.");
+  if(reveals>=2)
+    improve.push("Você pediu a resposta "+reveals+" vezes. Tente chutar antes de revelar: o erro fixa mais que a resposta pronta.");
+  if(!improve.length) improve.push("Nenhum ponto crítico nesta sessão. Suba o nível: peça frases mais longas no próximo treino.");
+
+  drills.push("Pegue as palavras erradas de hoje e escreva uma frase sua com cada uma — não a tradução, uma frase da sua rotina.");
+  if(worstK!==null) drills.push("Amanhã, comece direto pela etapa <em>"+STAGES[worstK].name+"</em> em vez de repetir o que você já acerta.");
+  drills.push("Dez minutos por dia rendem mais que uma hora no sábado: marque o mesmo horário e repita cinco dias seguidos.");
+  drills.push("Depois do treino, fale em voz alta por 60 segundos sobre o seu dia em inglês, mesmo com erros.");
+
+  return {
+    headline: rate>=70
+      ? "Sessão sólida: "+S.correct+" de "+S.total+" certas, chegando à etapa "+(S.stage+1)+"."
+      : "Base em construção: "+S.correct+" de "+S.total+" certas. O caminho está claro.",
+    strengths, improve, drills
+  };
+}
+
+async function buildReport(){
+  if(S.report) return S.report;
+  const st = stageStats();
+  const lines = S.log.map(l=>{
+    if(l.kind==="chat") return "[conversa livre] o aluno escreveu: "+l.answer;
+    return "["+STAGES[l.stage].name+" / "+STAGES[l.stage].lvl+"] pedido: "+l.prompt+
+           " | resposta do aluno: "+l.answer+" | esperado: "+l.expected+" | "+(l.ok?"CERTO":"ERRADO");
+  }).join("\n");
+  const stats = Object.keys(st).map(k=>STAGES[k].name+" "+st[k].ok+"/"+st[k].n).join("; ");
+
+  const sys = "You are James, an English teacher writing a short post-session study report for a Brazilian adult learner. "+
+    "Respond ONLY with raw JSON, no markdown fences, no preamble: "+
+    '{"headline":"...","strengths":["..."],"improve":["..."],"drills":["..."]}. '+
+    "Write every string in Brazilian Portuguese. "+
+    "headline: one honest sentence, max 18 words. strengths: 2-3 items. improve: 2-3 items. drills: 3-4 items, "+
+    "each a concrete exercise the student can do in 10 minutes tomorrow. Each item is ONE sentence under 28 words. "+
+    "Be specific: cite the actual words or sentences the student missed and name the grammar point when there is one "+
+    "(present perfect, third person -s, prepositions, word order). Wrap any English word or phrase you cite in <em> tags. "+
+    "No generic filler and no praise without evidence in the data.";
+
+  const usr = "Duração: 10 minutos. Acertos: "+S.correct+" de "+S.total+". Etapa alcançada: "+(S.stage+1)+" de 5.\n"+
+              "Desempenho por etapa: "+(stats||"sem dados")+"\n\nHistórico completo:\n"+(lines||"nenhuma resposta registrada");
+
+  try{
+    let raw = await callClaude([{role:"user",content:usr}], sys);
+    raw = raw.replace(/```json|```/g,"").trim();
+    const m = raw.match(/\{[\s\S]*\}/);
+    const j = JSON.parse(m?m[0]:raw);
+    if(!Array.isArray(j.strengths)||!Array.isArray(j.improve)) throw 0;
+    j.drills = Array.isArray(j.drills)&&j.drills.length ? j.drills : localReport(st).drills;
+    S.report = j;
+  }catch(e){
+    S.report = localReport(st);
+  }
+  return S.report;
+}
+
+function safeItem(s){
+  return escapeHtml(String(s)).replace(/&lt;em&gt;/g,"<em>").replace(/&lt;\/em&gt;/g,"</em>");
+}
+
+function sectionHtml(title, items, cls){
+  if(!items||!items.length) return "";
+  return '<div class="sec '+cls+'"><h3>'+title+'</h3><ul>'+
+         items.map(i=>'<li>'+safeItem(i)+'</li>').join("")+'</ul></div>';
+}
+
+function renderReport(r){
+  const missed = S.log.filter(l=>!l.ok && l.kind!=="chat").slice(0,8);
+  let html = "";
+  html += sectionHtml("pontos fortes", r.strengths, "up");
+  html += sectionHtml("pontos a melhorar", r.improve, "down");
+  html += sectionHtml("como treinar amanhã", r.drills, "how");
+  if(missed.length){
+    html += '<div class="sec"><h3>itens para revisar</h3><div class="revw">'+
+      missed.map(m=>'<div><b>'+escapeHtml(m.prompt)+'</b><span>'+escapeHtml(m.expected||"—")+'</span></div>').join("")+
+      '</div></div>';
+  }
+  $("repBody").innerHTML = html;
+  $("repHeadline").textContent = r.headline || "";
+}
+
+async function openReport(){
+  $("repVeil").classList.add("on");
+  if(S.report){ renderReport(S.report); return; }
+  $("repHeadline").textContent = "Lendo suas respostas…";
+  $("repBody").innerHTML = '<div class="bubble typing" style="display:inline-block"><span></span><span></span><span></span></div>';
+  const r = await buildReport();
+  renderReport(r);
+}
+
+/* ============================================================
+   VOZ — leitura em voz alta (TTS)
+   ============================================================ */
+
+let voices = [];
+function loadVoices(){ try{ voices = speechSynthesis.getVoices()||[]; }catch(e){ voices=[]; } }
+if("speechSynthesis" in window){
+  loadVoices();
+  speechSynthesis.addEventListener("voiceschanged", loadVoices);
+}
+
+function pickVoice(lang){
+  const base = lang.slice(0,2);
+  const pool = voices.filter(v=>v.lang && v.lang.toLowerCase().startsWith(base));
+  if(!pool.length) return null;
+  const nice = pool.find(v=>/natural|google|premium|enhanced|samantha|luciana/i.test(v.name));
+  return nice || pool[0];
+}
+
+function deriveSpeak(el){
+  const b = el.querySelector(".bubble");
+  if(!b) return {text:"", lang:"en-US"};
+  const en = [...b.querySelectorAll(".en,.fix")].map(n=>n.textContent.trim()).filter(Boolean);
+  if(en.length) return {text: en.join(". "), lang:"en-US"};
+  return {text: b.innerText.replace(/\s+/g," ").trim(), lang:"pt-BR"};
+}
+
+let speakingBtn = null;
+function stopSpeech(){
+  try{ speechSynthesis.cancel(); }catch(e){}
+  if(speakingBtn){ speakingBtn.classList.remove("on"); speakingBtn = null; }
+}
+
+function speak(text, lang, btn){
+  if(!("speechSynthesis" in window) || !text) return;
+  stopSpeech();
+  const u = new SpeechSynthesisUtterance(text.slice(0,600));
+  u.lang = lang || "en-US";
+  u.rate = lang === "pt-BR" ? 1 : 0.9;
+  const v = pickVoice(u.lang);
+  if(v) u.voice = v;
+  if(btn){ btn.classList.add("on"); speakingBtn = btn; }
+  u.onend = u.onerror = ()=>{ if(btn) btn.classList.remove("on"); if(speakingBtn===btn) speakingBtn=null; };
+  try{ speechSynthesis.speak(u); }catch(e){}
+}
+
+wrap.addEventListener("click", e=>{
+  const b = e.target.closest(".spk");
+  if(!b) return;
+  if(b.classList.contains("on")){ stopSpeech(); return; }
+  const s = deriveSpeak(b.closest(".msg"));
+  speak(s.text, s.lang, b);
+});
+
+/* ============================================================
+   VOZ — ditado por microfone (STT)
+   ============================================================ */
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec=null, recOn=false, recCancelled=false, recSecs=0, recClock=null, finalTx="";
+
+function micLang(){
+  const st = STAGES[S.stage];
+  return (st.kind==="word" && st.dir==="en2pt") ? "pt-BR" : "en-US";
+}
+function paintMicLang(){
+  const l = micLang();
+  $("micLang").textContent = l==="pt-BR" ? "PT" : "EN";
+  $("micBtn").title = l==="pt-BR" ? "Falar a resposta em português" : "Falar a resposta em inglês";
+}
+
+function recUI(on){
+  $("fieldMain").classList.toggle("hide", on);
+  $("recBar").classList.toggle("on", on);
+}
+
+function startRec(){
+  if(!S.running) return;
+  if(!SR){
+    bubble('Este navegador não reconhece fala. O ditado funciona no <strong>Chrome</strong>, no <strong>Edge</strong> e no <strong>Safari</strong> — abra o arquivo direto em um deles.<hr><span class="cue">A leitura em voz alta continua funcionando normalmente.</span>',"teacher","bad");
+    return;
+  }
+  stopSpeech();
+  finalTx=""; recCancelled=false; recSecs=0;
+  $("recText").textContent="ouvindo…";
+  $("recTime").textContent="0:00";
+  recUI(true); recOn=true;
+
+  rec = new SR();
+  rec.lang = micLang();
+  rec.interimResults = true;
+  rec.continuous = true;
+
+  rec.onresult = ev=>{
+    let interim="";
+    for(let i=ev.resultIndex;i<ev.results.length;i++){
+      const r=ev.results[i];
+      if(r.isFinal) finalTx += r[0].transcript+" "; else interim += r[0].transcript;
+    }
+    const shown=(finalTx+interim).trim();
+    $("recText").textContent = shown || "ouvindo…";
+  };
+
+  rec.onerror = ev=>{
+    recOn=false; recUI(false);
+    const msg = (ev.error==="not-allowed"||ev.error==="service-not-allowed")
+      ? 'O navegador bloqueou o microfone. Libere o acesso no cadeado da barra de endereço e tente de novo.<hr><span class="cue">Dentro de uma janela incorporada o acesso costuma ser negado — abra o arquivo em uma aba própria do Chrome.</span>'
+      : (ev.error==="no-speech")
+        ? 'Não captei nenhuma voz. Fale mais perto do microfone e tente de novo.'
+        : 'O reconhecimento de voz falhou ('+ev.error+'). Você pode digitar a resposta normalmente.';
+    bubble(msg,"teacher","bad");
+  };
+
+  rec.onend = ()=>{
+    recOn=false; clearInterval(recClock); recUI(false);
+    if(recCancelled){ finalTx=""; return; }
+    const text = finalTx.trim();
+    if(!text) return;
+    input.value = text;
+    input.dispatchEvent(new Event("input"));
+    submit();
+  };
+
+  try{ rec.start(); }catch(e){ recOn=false; recUI(false); }
+
+  clearInterval(recClock);
+  recClock = setInterval(()=>{
+    recSecs++;
+    $("recTime").textContent = "0:"+String(recSecs).padStart(2,"0");
+    if(recSecs>=45) stopRec();
+  },1000);
+}
+
+function stopRec(){
+  clearInterval(recClock);
+  if(rec){ try{ rec.stop(); }catch(e){ recOn=false; recUI(false); } }
+  else { recOn=false; recUI(false); }
+}
+
+function cancelRec(){
+  recCancelled=true;
+  clearInterval(recClock);
+  $("recText").textContent="";
+  if(rec){ try{ rec.abort(); }catch(e){} }
+  recOn=false; recUI(false);
+}
+
+$("micBtn").addEventListener("click", ()=>{ recOn ? stopRec() : startRec(); });
+$("recStop").addEventListener("click", stopRec);
+$("recCancel").addEventListener("click", cancelRec);
+$("autoSpeak").addEventListener("change", e=>{ if(!e.target.checked) stopSpeech(); });
+
+/* ============================================================
+   CONTROLES
+   ============================================================ */
+
+$("startBtn").addEventListener("click", begin);
+$("pauseBtn").addEventListener("click", pauseTimer);
+$("resetBtn").addEventListener("click", resetTimer);
+$("againBtn").addEventListener("click", ()=>{ $("endVeil").classList.remove("on"); begin(); });
+$("srcBtn").addEventListener("click", ()=>{ closePlan(); $("srcVeil").classList.add("on"); });
+
+function openPlan(){ document.body.classList.add("plan-open"); }
+function closePlan(){ document.body.classList.remove("plan-open"); }
+$("miniBar").addEventListener("click", ()=>{
+  document.body.classList.contains("plan-open") ? closePlan() : openPlan();
+});
+$("planClose").addEventListener("click", closePlan);
+$("closeSrc").addEventListener("click", ()=> $("srcVeil").classList.remove("on"));
+$("webTool").addEventListener("change", e=>{ S.useWeb = e.target.checked; });
+
+$("closeEnd").addEventListener("click", ()=> $("endVeil").classList.remove("on"));
+$("reportBtn").addEventListener("click", openReport);
+$("closeRep").addEventListener("click", ()=> $("repVeil").classList.remove("on"));
+$("repAgain").addEventListener("click", begin);
+
+["srcVeil","endVeil","repVeil"].forEach(id=>{
+  $(id).addEventListener("click", e=>{ if(e.target.id===id) $(id).classList.remove("on"); });
+});
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape"){
+    document.querySelectorAll(".veil.on").forEach(v=>v.classList.remove("on"));
+    closePlan();
+  }
+});
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+}
+
+/* ---------- boot ---------- */
+renderStages(); renderScore(); paintClock();
+bubble('<span class="cue">sessão não iniciada</span><span class="task">Dez minutos, cinco etapas.</span>Começa com palavras soltas em <span class="lvl">A1</span> e termina com uma conversa de verdade em <span class="lvl">B1+</span>. Clique em <strong>Iniciar treino</strong> quando estiver pronto.',"teacher");
+</script>
