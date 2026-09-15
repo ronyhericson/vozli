@@ -325,6 +325,20 @@
   .sw{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--muted);margin-bottom:18px}
   .sw input{width:16px;height:16px;accent-color:var(--blue)}
 
+  .fl{display:block;margin-bottom:13px;font-size:12.5px;color:var(--muted)}
+  .fl select,.fl input{
+    display:block;width:100%;margin-top:5px;padding:9px 11px;
+    border:1px solid var(--line);border-radius:var(--r);background:var(--surface);
+    font-family:var(--sans);font-size:14.5px;color:var(--ink);
+  }
+  .fl select:focus,.fl input:focus{outline:none;border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+  .warn-note{
+    font-size:12.5px;color:var(--alert);border-left:3px solid var(--alert);
+    background:var(--alert-soft);padding:9px 11px;margin:0 0 13px;line-height:1.4;
+  }
+  #aiTest.ok{color:var(--blue)}
+  #aiTest.err{color:var(--alert)}
+
   /* ---------- mobile ---------- */
   @media (max-width:860px){
     header{padding:10px 14px 9px;gap:8px 12px;row-gap:9px}
@@ -430,6 +444,11 @@
     </div>
 
     <div class="src-box" style="margin-bottom:16px">
+      <p>Motor de IA: <strong id="aiStatus">detectando…</strong></p>
+      <button class="btn ghost" id="aiBtn">Configurar IA</button>
+    </div>
+
+    <div class="src-box" style="margin-bottom:16px">
       <label class="sw" style="margin:0">
         <input type="checkbox" id="autoSpeak" checked>
         Ouvir o James automaticamente
@@ -514,6 +533,44 @@
     <div class="row" style="margin-top:24px">
       <button class="btn solid" id="repAgain">Treinar de novo</button>
       <button class="btn ghost" id="closeRep">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="veil" id="aiVeil">
+  <div class="card">
+    <h2>Motor de IA</h2>
+    <p>O professor usa um modelo de linguagem para julgar sinônimos, explicar erros, conversar na etapa 5 e escrever o relatório. Aqui você escolhe por onde essas chamadas passam. No modo automático o app tenta um provedor de cada vez e fica com o primeiro que responder.</p>
+
+    <label class="fl">Provedor
+      <select id="aiMode">
+        <option value="auto">Automático — tenta na ordem</option>
+        <option value="anthropic">Anthropic — só funciona dentro do Claude</option>
+        <option value="puter">Puter.js — sem chave, qualquer hospedagem</option>
+        <option value="pollinations">Pollinations — sem chave, anônimo</option>
+        <option value="custom">Endpoint próprio — compatível com OpenAI</option>
+      </select>
+    </label>
+
+    <div id="customBox" hidden>
+      <label class="fl">URL do endpoint
+        <input id="aiUrl" placeholder="https://seu-proxy.workers.dev/v1/chat/completions">
+      </label>
+      <label class="fl">Modelo
+        <input id="aiModel" placeholder="gpt-4o-mini">
+      </label>
+      <label class="fl">Chave (opcional, fica só neste navegador)
+        <input id="aiKey" type="password" autocomplete="off">
+      </label>
+      <p class="warn-note">Em site público, não preencha a chave aqui: qualquer visitante lê o código da página. Use um proxy que guarde a chave no servidor.</p>
+    </div>
+
+    <p class="cue" id="aiTest" style="min-height:18px;display:block;margin:14px 0 18px"></p>
+
+    <div class="row">
+      <button class="btn solid" id="aiSave">Salvar</button>
+      <button class="btn" id="aiCheck">Testar conexão</button>
+      <button class="btn ghost" id="aiClose">Fechar</button>
     </div>
   </div>
 </div>
@@ -991,15 +1048,225 @@ function renderTeacherText(s){
    PROFESSOR (API)
    ============================================================ */
 
-async function callClaude(messages, system, tools){
-  const body = { model:"claude-sonnet-4-6", max_tokens:1000, system, messages };
-  if(tools) body.tools = tools;
+/* ============================================================
+   MOTOR DE IA — cadeia de provedores com fallback
+   ============================================================ */
+
+const AI = {
+  mode:"auto",
+  order:["anthropic","puter","pollinations"],
+  active:null,
+  dead:{},
+  custom:{url:"",model:"",key:""}
+};
+
+function withTimeout(promise, ms, label){
+  return Promise.race([
+    promise,
+    new Promise((_,rej)=>setTimeout(()=>rej(new Error(label+" demorou demais")), ms))
+  ]);
+}
+
+/* --- Anthropic: funciona dentro do ambiente do Claude --- */
+async function pAnthropic(system, messages, opts){
+  const body = {model:"claude-sonnet-4-6", max_tokens:1000, system, messages};
+  if(opts && opts.tools) body.tools = opts.tools;
   const r = await fetch("https://api.anthropic.com/v1/messages",{
     method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)
   });
-  const data = await r.json();
-  return (data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  const d = await r.json();
+  if(d.error) throw new Error(d.error.message||"erro da API");
+  const t = (d.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
+  if(!t) throw new Error("resposta vazia");
+  return t;
 }
+
+/* --- Puter.js: sem chave, roda em qualquer hospedagem --- */
+let puterLoad = null;
+function loadPuter(){
+  if(window.puter && window.puter.ai) return Promise.resolve(window.puter);
+  if(puterLoad) return puterLoad;
+  puterLoad = new Promise((res,rej)=>{
+    const s = document.createElement("script");
+    s.src = "https://js.puter.com/v2/";
+    s.async = true;
+    s.onload = ()=> (window.puter && window.puter.ai) ? res(window.puter) : rej(new Error("biblioteca não inicializou"));
+    s.onerror = ()=> rej(new Error("script bloqueado"));
+    document.head.appendChild(s);
+    setTimeout(()=>rej(new Error("carregamento demorou demais")), 15000);
+  });
+  return puterLoad;
+}
+function extractPuter(r){
+  if(!r) return "";
+  if(typeof r === "string") return r.trim();
+  if(typeof r.text === "string") return r.text.trim();
+  const c = r.message && r.message.content;
+  if(typeof c === "string") return c.trim();
+  if(Array.isArray(c)) return c.map(b=>b && b.text ? b.text : "").join("\n").trim();
+  if(r.choices && r.choices[0] && r.choices[0].message) return String(r.choices[0].message.content||"").trim();
+  return "";
+}
+async function pPuter(system, messages){
+  const puter = await loadPuter();
+  const msgs = [{role:"system",content:system}].concat(messages);
+  const res = await puter.ai.chat(msgs, {model:"anthropic/claude-sonnet-5"});
+  const t = extractPuter(res);
+  if(!t) throw new Error("resposta vazia");
+  return t;
+}
+
+/* --- Pollinations: sem chave, anônimo, compatível com OpenAI --- */
+async function pPollinations(system, messages){
+  const r = await fetch("https://text.pollinations.ai/openai",{
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      model:"openai",
+      messages:[{role:"system",content:system}].concat(messages),
+      private:true, referrer:"vozli"
+    })
+  });
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  const raw = await r.text();
+  let t = "";
+  try{
+    const d = JSON.parse(raw);
+    t = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || "";
+  }catch(e){ t = raw; }
+  t = String(t).trim();
+  if(!t) throw new Error("resposta vazia");
+  return t;
+}
+
+/* --- Endpoint próprio, compatível com OpenAI --- */
+async function pCustom(system, messages){
+  const c = AI.custom;
+  if(!c.url) throw new Error("endpoint não configurado");
+  const h = {"Content-Type":"application/json"};
+  if(c.key) h["Authorization"] = "Bearer "+c.key;
+  const r = await fetch(c.url,{
+    method:"POST", headers:h,
+    body: JSON.stringify({
+      model: c.model || "gpt-4o-mini",
+      max_tokens: 1000,
+      messages: [{role:"system",content:system}].concat(messages)
+    })
+  });
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  const d = await r.json();
+  const t = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content)
+         || (d.content && d.content.filter(b=>b.type==="text").map(b=>b.text).join("\n"))
+         || "";
+  if(!String(t).trim()) throw new Error("resposta vazia");
+  return String(t).trim();
+}
+
+const PROVIDERS = {
+  anthropic:   {label:"Anthropic",    fn:pAnthropic},
+  puter:       {label:"Puter.js",     fn:pPuter},
+  pollinations:{label:"Pollinations", fn:pPollinations},
+  custom:      {label:"Endpoint próprio", fn:pCustom}
+};
+
+function providerChain(){
+  if(AI.mode !== "auto") return [AI.mode];
+  const list = [];
+  if(AI.custom.url) list.push("custom");
+  if(AI.active) list.push(AI.active);
+  return list.concat(AI.order);
+}
+
+function paintAI(){
+  const el = $("aiStatus");
+  if(!el) return;
+  if(AI.active) el.textContent = PROVIDERS[AI.active].label;
+  else if(AI.mode !== "auto") el.textContent = PROVIDERS[AI.mode].label+" (não testado)";
+  else el.textContent = "detectando…";
+}
+
+async function askLLM(messages, system, opts){
+  const chain = providerChain();
+  const tried = new Set();
+  const errs = [];
+  for(const id of chain){
+    if(tried.has(id) || !PROVIDERS[id]) continue;
+    tried.add(id);
+    if(AI.mode === "auto" && AI.dead[id]) continue;
+    try{
+      const t = await withTimeout(PROVIDERS[id].fn(system, messages, opts), 35000, PROVIDERS[id].label);
+      AI.active = id; paintAI();
+      return t;
+    }catch(e){
+      errs.push(PROVIDERS[id].label+": "+e.message);
+      if(AI.mode === "auto") AI.dead[id] = true;
+      if(AI.active === id){ AI.active = null; paintAI(); }
+    }
+  }
+  AI.dead = {};
+  throw new Error(errs.join(" | ") || "nenhum motor disponível");
+}
+
+/* compatibilidade com as chamadas existentes */
+function callClaude(messages, system, tools){
+  return askLLM(messages, system, tools ? {tools} : null);
+}
+
+/* --- preferências --- */
+async function loadAIPrefs(){
+  try{
+    if(typeof window.storage === "undefined") return;
+    const r = await window.storage.get("vozli:ai");
+    if(!r || !r.value) return;
+    const j = JSON.parse(r.value);
+    AI.mode = j.mode || "auto";
+    AI.custom = Object.assign({url:"",model:"",key:""}, j.custom||{});
+  }catch(e){}
+  syncAIForm(); paintAI();
+}
+async function saveAIPrefs(){
+  try{
+    if(typeof window.storage === "undefined") return;
+    await window.storage.set("vozli:ai", JSON.stringify({mode:AI.mode, custom:AI.custom}));
+  }catch(e){}
+}
+
+function syncAIForm(){
+  $("aiMode").value = AI.mode;
+  $("aiUrl").value = AI.custom.url;
+  $("aiModel").value = AI.custom.model;
+  $("aiKey").value = AI.custom.key;
+  $("customBox").hidden = $("aiMode").value !== "custom";
+}
+function readAIForm(){
+  AI.mode = $("aiMode").value;
+  AI.custom = {url:$("aiUrl").value.trim(), model:$("aiModel").value.trim(), key:$("aiKey").value.trim()};
+  AI.dead = {}; AI.active = null;
+}
+
+function aiMsg(text, kind){
+  const el = $("aiTest");
+  el.className = "cue"+(kind?" "+kind:"");
+  el.textContent = text;
+}
+
+$("aiBtn").addEventListener("click", ()=>{ closePlan(); syncAIForm(); aiMsg(""); $("aiVeil").classList.add("on"); });
+$("aiClose").addEventListener("click", ()=> $("aiVeil").classList.remove("on"));
+$("aiMode").addEventListener("change", ()=>{ $("customBox").hidden = $("aiMode").value !== "custom"; });
+$("aiSave").addEventListener("click", async ()=>{
+  readAIForm(); await saveAIPrefs(); paintAI();
+  aiMsg("Preferências salvas.","ok");
+});
+$("aiCheck").addEventListener("click", async ()=>{
+  readAIForm(); await saveAIPrefs();
+  aiMsg("Testando…");
+  try{
+    const t = await askLLM([{role:"user",content:"Responda apenas com a palavra: ok"}], "You answer with a single lowercase word.");
+    aiMsg("Conectado por "+PROVIDERS[AI.active].label+". Resposta: "+t.slice(0,40),"ok");
+  }catch(e){
+    aiMsg("Nenhum provedor respondeu. "+e.message,"err");
+  }
+});
 
 async function judge(it, ans){
   const direction = it.dir==="pt2en" ? "Portuguese to English" : "English to Portuguese";
@@ -1483,7 +1750,7 @@ $("reportBtn").addEventListener("click", openReport);
 $("closeRep").addEventListener("click", ()=> $("repVeil").classList.remove("on"));
 $("repAgain").addEventListener("click", begin);
 
-["srcVeil","endVeil","repVeil"].forEach(id=>{
+["srcVeil","endVeil","repVeil","aiVeil"].forEach(id=>{
   $(id).addEventListener("click", e=>{ if(e.target.id===id) $(id).classList.remove("on"); });
 });
 document.addEventListener("keydown", e=>{
@@ -1499,5 +1766,6 @@ function escapeHtml(s){
 
 /* ---------- boot ---------- */
 renderStages(); renderScore(); paintClock();
+syncAIForm(); paintAI(); loadAIPrefs();
 bootMessage();
 </script>

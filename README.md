@@ -16,7 +16,7 @@ Tudo roda em um único arquivo HTML, sem build, sem dependências instaladas e s
 - [Base de conhecimento e fontes](#base-de-conhecimento-e-fontes)
 - [Executando localmente](#executando-localmente)
 - [Publicando no GitHub Pages](#publicando-no-github-pages)
-- [Importante: o professor de IA fora do Claude](#importante-o-professor-de-ia-fora-do-claude)
+- [Motor de IA: funciona em qualquer hospedagem](#motor-de-ia-funciona-em-qualquer-hospedagem)
 - [Compatibilidade](#compatibilidade)
 - [Personalizando o conteúdo](#personalizando-o-conteúdo)
 - [Acessibilidade](#acessibilidade)
@@ -144,27 +144,44 @@ O GitHub Pages serve por HTTPS, o que é exatamente o que o navegador exige para
 
 ---
 
-## Importante: o professor de IA fora do Claude
+## Motor de IA: funciona em qualquer hospedagem
 
-O aplicativo nasceu dentro do ambiente de artefatos do Claude, onde as chamadas para `https://api.anthropic.com/v1/messages` são autenticadas por trás dos panos. **Fora desse ambiente, essas chamadas são rejeitadas.**
+O professor usa um modelo de linguagem para julgar sinônimos, explicar erros, conduzir o bate-papo da etapa 5 e escrever o relatório. Em vez de depender de um único fornecedor, o aplicativo mantém uma **cadeia de provedores com fallback automático**: tenta um de cada vez, fica com o primeiro que responder e marca os que falharam para não repetir a espera na mesma sessão.
 
-O que continua funcionando em qualquer hospedagem:
+Ordem padrão do modo automático:
 
-- as cinco etapas, o cronômetro e a navegação
-- a correção local de palavras e frases
-- o ditado por microfone e a leitura em voz alta
-- o relatório final, na versão calculada por estatística
+| Ordem | Provedor | Chave? | Onde funciona |
+|:-----:|----------|:------:|---------------|
+| 1 | Endpoint próprio, se configurado | opcional | qualquer lugar |
+| 2 | **Anthropic** direto | não | apenas dentro do ambiente de artefatos do Claude |
+| 3 | **Puter.js** | não | qualquer hospedagem, inclusive GitHub Pages |
+| 4 | **Pollinations** | não | qualquer hospedagem, anônimo |
+| — | correção local | — | sempre, como última rede de proteção |
 
-O que degrada sem a API:
+O painel **Configurar IA**, na barra lateral, permite fixar um provedor específico, apontar um endpoint próprio compatível com a API do OpenAI e testar a conexão na hora. A escolha é gravada no navegador e a barra lateral mostra qual motor está ativo.
 
-- o julgamento de sinônimos e variantes fora do gabarito, que passam a ser marcados como erro
-- a explicação personalizada de cada erro
-- a etapa 5 de bate-papo livre
-- o texto analítico do relatório
+### Puter.js
 
-> **Nunca coloque a chave da API dentro do HTML.** Qualquer visitante lê o código-fonte da página e passa a gastar na sua conta.
+Biblioteca cliente carregada sob demanda de `https://js.puter.com/v2/`, sem chave e sem backend. Funciona pelo modelo *user-pays*: cada visitante cobre o próprio consumo pela conta Puter dele, o que pode exigir um login na primeira chamada. Para o desenvolvedor não há chave para gerenciar nem conta para provisionar.
 
-A forma correta de habilitar a IA em produção é um proxy serverless — Cloudflare Workers, Vercel Functions ou Netlify Functions — que guarda a chave como variável de ambiente, repassa a requisição para a Anthropic e devolve a resposta. No arquivo, basta trocar a URL dentro de `callClaude()` pelo endereço do seu proxy.
+### Pollinations
+
+Endpoint `https://text.pollinations.ai/openai`, compatível com o formato de chat da OpenAI, sem autenticação. É o caminho mais simples, mas é anônimo e limitado por IP — serve bem como alternativa, não como garantia.
+
+### Endpoint próprio
+
+O caminho recomendado para produção. Suba uma função serverless em Cloudflare Workers, Vercel ou Netlify, guarde a chave como variável de ambiente e aponte o campo de URL para ela. Nada muda no restante do código.
+
+> **Nunca coloque uma chave de API dentro do HTML de um site público.** Qualquer visitante lê o código-fonte da página e passa a gastar na sua conta. O campo de chave do painel existe para uso local; em site publicado, use um proxy.
+
+### Quando nenhum provedor responde
+
+O aplicativo continua utilizável, com degradação controlada:
+
+- as cinco etapas, o cronômetro, o ditado e a leitura em voz alta seguem funcionando
+- a correção de palavras e frases cai na verificação local por normalização e sobreposição de tokens
+- o relatório passa a ser o calculado por estatística
+- a etapa 5 avisa que a conversa está indisponível
 
 ---
 
@@ -239,7 +256,8 @@ index.html
     ├── RENDER                   balões, placar, plano
     ├── CRONÔMETRO               contagem, pausa, reinício
     ├── FLUXO DO TREINO          perguntas, respostas, avanço
-    ├── PROFESSOR (API)          julgamento e conversa
+    ├── MOTOR DE IA              cadeia de provedores e fallback
+    ├── PROFESSOR                julgamento e conversa
     ├── RELATÓRIO                geração e fallback local
     ├── VOZ                      síntese e reconhecimento
     └── CONTROLES                eventos da interface
@@ -254,7 +272,8 @@ index.html
 - [ ] Exportação do relatório em PDF
 - [ ] Repetição espaçada: reintroduzir palavras erradas nas sessões seguintes
 - [ ] Durações alternativas de 5 e 20 minutos
-- [ ] Proxy serverless de referência para habilitar a IA em produção
+- [ ] Proxy serverless de referência pronto para copiar
+- [ ] Streaming das respostas do professor na etapa 5
 
 ---
 
