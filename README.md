@@ -16,7 +16,7 @@ Tudo roda em um único arquivo HTML, sem build, sem dependências instaladas e s
 - [Base de conhecimento e fontes](#base-de-conhecimento-e-fontes)
 - [Executando localmente](#executando-localmente)
 - [Publicando no GitHub Pages](#publicando-no-github-pages)
-- [Motor de IA: funciona em qualquer hospedagem](#motor-de-ia-funciona-em-qualquer-hospedagem)
+- [Motor de IA: Google Gemini](#motor-de-ia-google-gemini)
 - [Compatibilidade](#compatibilidade)
 - [Personalizando o conteúdo](#personalizando-o-conteúdo)
 - [Acessibilidade](#acessibilidade)
@@ -90,7 +90,9 @@ O texto lido é extraído dos elementos marcados como conteúdo em inglês dentr
 
 ### Persistência
 
-O resultado da última sessão é gravado quando a API `window.storage` está disponível, e ignorado silenciosamente quando não está. Nenhum dado sai do dispositivo.
+Configuração do Gemini e resultado da última sessão são gravados no `localStorage`, sob as chaves `vozli:ai` e `vozli:last`. Quando a API `window.storage` existe — caso do ambiente de artefatos do Claude — os mesmos dados são espelhados nela, e o que estiver lá é migrado para o `localStorage` na primeira carga. Toda leitura e escrita é protegida por `try/catch`, porque navegação anônima e janelas embutidas podem bloquear o armazenamento; nesse caso a configuração vale só para a sessão aberta e o aplicativo avisa ao salvar.
+
+Nenhum dado sai do dispositivo. A chave da API fica apenas neste navegador.
 
 ---
 
@@ -144,44 +146,42 @@ O GitHub Pages serve por HTTPS, o que é exatamente o que o navegador exige para
 
 ---
 
-## Motor de IA: funciona em qualquer hospedagem
+## Motor de IA: Google Gemini
 
-O professor usa um modelo de linguagem para julgar sinônimos, explicar erros, conduzir o bate-papo da etapa 5 e escrever o relatório. Em vez de depender de um único fornecedor, o aplicativo mantém uma **cadeia de provedores com fallback automático**: tenta um de cada vez, fica com o primeiro que responder e marca os que falharam para não repetir a espera na mesma sessão.
+O professor usa o Google Gemini para julgar sinônimos, explicar erros, conduzir o bate-papo da etapa 5 e escrever o relatório. É o único provedor, configurado pelo painel **Gemini** na barra lateral.
 
-Ordem padrão do modo automático:
+### Configuração
 
-| Ordem | Provedor | Chave? | Onde funciona |
-|:-----:|----------|:------:|---------------|
-| 1 | Endpoint próprio, se configurado | opcional | qualquer lugar |
-| 2 | **Anthropic** direto | não | apenas dentro do ambiente de artefatos do Claude |
-| 3 | **Puter.js** | não | qualquer hospedagem, inclusive GitHub Pages |
-| 4 | **Pollinations** | não | qualquer hospedagem, anônimo |
-| — | correção local | — | sempre, como última rede de proteção |
+1. Gere uma chave gratuita em [aistudio.google.com/apikey](https://aistudio.google.com/apikey).
+2. Abra **Configurar** no painel Gemini, cole a chave e clique em **Ver modelos da minha chave** — a lista passa a mostrar apenas os modelos que aquela chave realmente pode usar, o que evita o erro 404 de modelo inexistente.
+3. Escolha um modelo, clique em **Testar conexão** e depois em **Salvar**. Chave, modelo e lista de modelos ficam gravados no `localStorage` do navegador, então não é preciso preencher de novo nas próximas visitas. O botão **Apagar chave** remove tudo.
 
-O painel **Configurar IA**, na barra lateral, permite fixar um provedor específico, apontar um endpoint próprio compatível com a API do OpenAI e testar a conexão na hora. A escolha é gravada no navegador e a barra lateral mostra qual motor está ativo.
+### Como a chamada é montada
 
-### Puter.js
+Endpoint `generativelanguage.googleapis.com/v1beta/models/{modelo}:generateContent`, com a chave no cabeçalho `x-goog-api-key`. As mensagens são convertidas para o formato nativo: o papel `assistant` vira `model` e o prompt de sistema vai em `system_instruction`.
 
-Biblioteca cliente carregada sob demanda de `https://js.puter.com/v2/`, sem chave e sem backend. Funciona pelo modelo *user-pays*: cada visitante cobre o próprio consumo pela conta Puter dele, o que pode exigir um login na primeira chamada. Para o desenvolvedor não há chave para gerenciar nem conta para provisionar.
+O adaptador se adapta ao modelo escolhido em vez de assumir um formato fixo:
 
-### Pollinations
+- **Controle de raciocínio por versão.** A família 2.5 recebe `thinkingConfig.thinkingBudget = 0` e a 3 em diante recebe `thinkingLevel = "low"`. Sem isso, os modelos com raciocínio gastam todo o orçamento pensando e devolvem texto vazio.
+- **Remoção automática de campos desconhecidos.** Se a API responder `Unknown name "<campo>"`, o adaptador lê o nome na própria mensagem de erro, retira aquele campo e repete a chamada, até quatro vezes. Isso cobre parâmetros que variam de modelo para modelo sem precisar mapear cada um.
+- **Instrução de sistema com alternativa.** Se o modelo não suportar `system_instruction`, o prompt passa a ser o início da conversa em vez de ser descartado.
+- **Limite por requisição.** Cada chamada é abortada em 25 segundos, com uma nova tentativa depois de 2 segundos quando o erro é passageiro. O orçamento total é de 70 segundos.
+- **Erros traduzidos.** Chave inválida, acesso negado, modelo inexistente, limite atingido, modelo congestionado, resposta cortada por tokens e bloqueio do filtro de conteúdo chegam como mensagens específicas, não como falha genérica.
 
-Endpoint `https://text.pollinations.ai/openai`, compatível com o formato de chat da OpenAI, sem autenticação. É o caminho mais simples, mas é anônimo e limitado por IP — serve bem como alternativa, não como garantia.
+### Limites e segurança
 
-### Endpoint próprio
+O nível gratuito tem cota por minuto e por dia. Isso pesa pouco aqui, porque a IA só é chamada quando a verificação local não reconhece a resposta — em uma sessão inteira costumam ser poucas chamadas.
 
-O caminho recomendado para produção. Suba uma função serverless em Cloudflare Workers, Vercel ou Netlify, guarde a chave como variável de ambiente e aponte o campo de URL para ela. Nada muda no restante do código.
+> **Em página pública, a chave é enviada a partir do navegador do visitante.** Restrinja a chave por domínio no Google Cloud ou coloque um proxy na frente que guarde a chave no servidor.
 
-> **Nunca coloque uma chave de API dentro do HTML de um site público.** Qualquer visitante lê o código-fonte da página e passa a gastar na sua conta. O campo de chave do painel existe para uso local; em site publicado, use um proxy.
+### Sem chave configurada
 
-### Quando nenhum provedor responde
-
-O aplicativo continua utilizável, com degradação controlada:
+O aplicativo continua utilizável, com degradação controlada, e avisa isso no início da sessão:
 
 - as cinco etapas, o cronômetro, o ditado e a leitura em voz alta seguem funcionando
-- a correção de palavras e frases cai na verificação local por normalização e sobreposição de tokens
+- a correção de palavras e frases usa a verificação local por normalização e sobreposição de tokens
 - o relatório passa a ser o calculado por estatística
-- a etapa 5 avisa que a conversa está indisponível
+- sinônimos fora do gabarito são marcados como erro e a etapa 5 fica indisponível
 
 ---
 
@@ -256,7 +256,7 @@ index.html
     ├── RENDER                   balões, placar, plano
     ├── CRONÔMETRO               contagem, pausa, reinício
     ├── FLUXO DO TREINO          perguntas, respostas, avanço
-    ├── MOTOR DE IA              cadeia de provedores e fallback
+    ├── MOTOR DE IA              adaptador do Gemini e fallback local
     ├── PROFESSOR                julgamento e conversa
     ├── RELATÓRIO                geração e fallback local
     ├── VOZ                      síntese e reconhecimento

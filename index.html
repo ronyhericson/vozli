@@ -444,7 +444,7 @@
     </div>
 
     <div class="src-box" style="margin-bottom:16px">
-      <p>Motor de IA: <strong id="aiStatus">detectando…</strong></p>
+      <p>Gemini: <strong id="aiStatus">não configurado</strong></p>
       <button class="btn ghost" id="aiBtn">Configurar IA</button>
     </div>
 
@@ -539,57 +539,32 @@
 
 <div class="veil" id="aiVeil">
   <div class="card">
-    <h2>Motor de IA</h2>
-    <p>O professor usa um modelo de linguagem para julgar sinônimos, explicar erros, conversar na etapa 5 e escrever o relatório. Aqui você escolhe por onde essas chamadas passam. No modo automático o app tenta um provedor de cada vez e fica com o primeiro que responder.</p>
+    <h2>Google Gemini</h2>
+    <p>O professor usa o Google Gemini para julgar sinônimos, explicar erros, conversar na etapa 5 e escrever o relatório. Sem a chave, o app continua funcionando com a correção local, mas essas quatro coisas ficam indisponíveis.</p>
 
-    <p class="warn-note" style="color:var(--blue);border-left-color:var(--blue);background:var(--soft)">Dentro de uma janela embutida — como a pré-visualização aqui no chat — o navegador bloqueia chamadas para fora e só o provedor Anthropic responde. Para testar Gemini, Puter ou um endpoint próprio, abra o arquivo em uma aba própria ou na página já publicada.</p>
+    <p class="warn-note" style="color:var(--blue);border-left-color:var(--blue);background:var(--soft)">Dentro de uma janela embutida — como a pré-visualização aqui no chat — o navegador bloqueia chamadas para fora. Para configurar e testar, abra o arquivo em uma aba própria ou na página já publicada.</p>
 
-    <label class="fl">Provedor
-      <select id="aiMode">
-        <option value="auto">Automático — tenta na ordem</option>
-        <option value="google">Google Gemini — chave gratuita do AI Studio</option>
-        <option value="anthropic">Anthropic — só funciona dentro do Claude</option>
-        <option value="puter">Puter.js — sem chave, qualquer hospedagem</option>
-        <option value="pollinations">Pollinations — sem chave, anônimo</option>
-        <option value="custom">Endpoint próprio — compatível com OpenAI</option>
-      </select>
+    <label class="fl">Chave da API Gemini
+      <input id="gKey" type="password" autocomplete="off" placeholder="AIza…">
     </label>
-
-    <div id="googleBox" hidden>
-      <label class="fl">Chave da API Gemini
-        <input id="gKey" type="password" autocomplete="off" placeholder="AIza…">
-      </label>
-      <label class="fl">Modelo
-        <select id="gModelSel"></select>
-      </label>
-      <input id="gModel" hidden placeholder="identificador do modelo" autocomplete="off"
-             style="width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:var(--r);font-family:var(--sans);font-size:14.5px;margin:-6px 0 12px">
-      <button class="btn ghost" id="gList" style="margin:-4px 0 12px">Ver modelos da minha chave</button>
-      <p class="cue" style="display:block;margin:-4px 0 12px">
-        Gere a chave em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>.
-        O nível gratuito tem limite por minuto e por dia, suficiente para sessões de estudo.
-      </p>
-      <p class="warn-note">A chave fica gravada só neste navegador, mas o site publicado a envia a partir do cliente. Em página pública, restrinja a chave por domínio no Google Cloud ou use um proxy.</p>
-    </div>
-
-    <div id="customBox" hidden>
-      <label class="fl">URL do endpoint
-        <input id="aiUrl" placeholder="https://seu-proxy.workers.dev/v1/chat/completions">
-      </label>
-      <label class="fl">Modelo
-        <input id="aiModel" placeholder="gpt-4o-mini">
-      </label>
-      <label class="fl">Chave (opcional, fica só neste navegador)
-        <input id="aiKey" type="password" autocomplete="off">
-      </label>
-      <p class="warn-note">Em site público, não preencha a chave aqui: qualquer visitante lê o código da página. Use um proxy que guarde a chave no servidor.</p>
-    </div>
+    <label class="fl">Modelo
+      <select id="gModelSel"></select>
+    </label>
+    <input id="gModel" hidden placeholder="identificador do modelo" autocomplete="off"
+           style="width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:var(--r);font-family:var(--sans);font-size:14.5px;margin:-6px 0 12px">
+    <button class="btn ghost" id="gList" style="margin:-4px 0 12px">Ver modelos da minha chave</button>
+    <p class="cue" style="display:block;margin:-4px 0 12px">
+      Gere a chave em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>.
+      O nível gratuito tem limite por minuto e por dia, suficiente para sessões de estudo.
+    </p>
+    <p class="warn-note">A chave fica gravada só neste navegador, mas o site publicado a envia a partir do cliente. Em página pública, restrinja a chave por domínio no Google Cloud ou use um proxy.</p>
 
     <p class="cue" id="aiTest" style="min-height:18px;display:block;margin:14px 0 18px"></p>
 
     <div class="row">
       <button class="btn solid" id="aiSave">Salvar</button>
       <button class="btn" id="aiCheck">Testar conexão</button>
+      <button class="btn ghost danger" id="aiForget">Apagar chave</button>
       <button class="btn ghost" id="aiClose">Fechar</button>
     </div>
   </div>
@@ -621,10 +596,6 @@
         <p>Os seis níveis A1–C2 que organizam a progressão desta sessão, descritos por aquilo que o aluno consegue fazer.</p>
       </li>
     </ul>
-    <label class="sw">
-      <input type="checkbox" id="webTool">
-      Deixar o professor consultar a web ao explicar um erro (respostas ficam mais lentas)
-    </label>
     <button class="btn" id="closeSrc">Fechar</button>
   </div>
 </div>
@@ -732,7 +703,7 @@ const S = {
   stage:0, item:null, queue:[], asked:0, hitInStage:0,
   correct:0, total:0, streak:0, best:0,
   running:false, secs:600, tick:null, revealed:false,
-  history:[], busy:false, useWeb:false, log:[], report:null
+  history:[], busy:false, log:[], report:null
 };
 
 function logItem(entry){ S.log.push(entry); }
@@ -925,6 +896,9 @@ function begin(){
 
   bubble('Hello! Eu sou o <span class="en">James</span>, seu professor nesta sessão. Vamos por etapas: palavras soltas, depois frases, e no fim a gente conversa de verdade.<hr><span class="cue">Regra da casa: responda rápido, mesmo com medo de errar. Errar aqui é parte do treino.</span>',"teacher");
   S.queue = buildQueue(STAGES[0]);
+  if(!AI.key){
+    bubble('<span class="cue">modo local</span>Sem a chave do Gemini eu corrijo pelo gabarito interno, mas não consigo avaliar sinônimos fora da lista, explicar seus erros nem conversar na última etapa. A chave é gratuita e leva um minuto: veja <strong>Gemini</strong> no plano da sessão.',"teacher","bad");
+  }
   setTimeout(nextItem, 700);
   input.focus();
 }
@@ -1069,100 +1043,17 @@ function renderTeacherText(s){
    ============================================================ */
 
 /* ============================================================
-   MOTOR DE IA — cadeia de provedores com fallback
+   MOTOR DE IA — Google Gemini
    ============================================================ */
 
 const AI = {
-  mode:"auto",
-  order:["anthropic","puter","pollinations"],
-  active:null,
-  dead:{},
-  custom:{url:"",model:"",key:""},
-  google:{key:"",model:""},
-  googleUsed:null,
-  googleList:[]
+  key:"",
+  model:"",
+  list:[],
+  ready:false
 };
 
-function withTimeout(promise, ms, label){
-  return Promise.race([
-    promise,
-    new Promise((_,rej)=>setTimeout(()=>rej(new Error(label+" demorou demais")), ms))
-  ]);
-}
-
-/* --- Anthropic: funciona dentro do ambiente do Claude --- */
-async function pAnthropic(system, messages, opts){
-  const body = {model:"claude-sonnet-4-6", max_tokens:1000, system, messages};
-  if(opts && opts.tools) body.tools = opts.tools;
-  const r = await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)
-  });
-  if(!r.ok) throw new Error("HTTP "+r.status);
-  const d = await r.json();
-  if(d.error) throw new Error(d.error.message||"erro da API");
-  const t = (d.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
-  if(!t) throw new Error("resposta vazia");
-  return t;
-}
-
-/* --- Puter.js: sem chave, roda em qualquer hospedagem --- */
-let puterLoad = null;
-function loadPuter(){
-  if(window.puter && window.puter.ai) return Promise.resolve(window.puter);
-  if(puterLoad) return puterLoad;
-  puterLoad = new Promise((res,rej)=>{
-    const s = document.createElement("script");
-    s.src = "https://js.puter.com/v2/";
-    s.async = true;
-    s.onload = ()=> (window.puter && window.puter.ai) ? res(window.puter) : rej(new Error("biblioteca não inicializou"));
-    s.onerror = ()=> rej(new Error("script bloqueado"));
-    document.head.appendChild(s);
-    setTimeout(()=>rej(new Error("carregamento demorou demais")), 15000);
-  });
-  return puterLoad;
-}
-function extractPuter(r){
-  if(!r) return "";
-  if(typeof r === "string") return r.trim();
-  if(typeof r.text === "string") return r.text.trim();
-  const c = r.message && r.message.content;
-  if(typeof c === "string") return c.trim();
-  if(Array.isArray(c)) return c.map(b=>b && b.text ? b.text : "").join("\n").trim();
-  if(r.choices && r.choices[0] && r.choices[0].message) return String(r.choices[0].message.content||"").trim();
-  return "";
-}
-async function pPuter(system, messages){
-  const puter = await loadPuter();
-  const msgs = [{role:"system",content:system}].concat(messages);
-  const res = await puter.ai.chat(msgs, {model:"anthropic/claude-sonnet-5"});
-  const t = extractPuter(res);
-  if(!t) throw new Error("resposta vazia");
-  return t;
-}
-
-/* --- Pollinations: sem chave, anônimo, compatível com OpenAI --- */
-async function pPollinations(system, messages){
-  const r = await fetch("https://text.pollinations.ai/openai",{
-    method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      model:"openai",
-      messages:[{role:"system",content:system}].concat(messages),
-      private:true, referrer:"vozli"
-    })
-  });
-  if(!r.ok) throw new Error("HTTP "+r.status);
-  const raw = await r.text();
-  let t = "";
-  try{
-    const d = JSON.parse(raw);
-    t = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || "";
-  }catch(e){ t = raw; }
-  t = String(t).trim();
-  if(!t) throw new Error("resposta vazia");
-  return t;
-}
-
-/* --- Google Gemini: chave gratuita do AI Studio --- */
+const GEMINI_DEFAULTS = ["gemini-3.8-flash","gemini-3-flash-preview","gemini-2.5-flash","gemini-2.5-flash-lite","gemini-2.5-pro"];
 const sleep = ms => new Promise(r=>setTimeout(r,ms));
 
 function gErr(msg, status, transient){
@@ -1175,10 +1066,10 @@ async function geminiCall(model, system, messages, key){
   const base = "https://generativelanguage.googleapis.com/v1beta/models/"+
                encodeURIComponent(model)+":generateContent";
 
-  // a família 2.5 aceita thinkingBudget; da 3 em diante o parâmetro mudou,
-  // então nesses modelos o campo é omitido e o limite de saída sobe
+  // a família 2.5 controla o raciocínio por orçamento, a 3 por nível;
+  // campos não reconhecidos são retirados automaticamente mais abaixo
   const major = parseFloat((model.match(/gemini-(\d+(?:\.\d+)?)/)||[])[1]) || 2.5;
-  const legacyThinking = major < 3;
+  const legacy = major < 3;
 
   const payload = {
     system_instruction:{parts:[{text:system}]},
@@ -1187,12 +1078,11 @@ async function geminiCall(model, system, messages, key){
       parts: [{text:String(m.content)}]
     })),
     generationConfig:{
-      maxOutputTokens: legacyThinking ? 2048 : 4096,
+      maxOutputTokens: legacy ? 2048 : 4096,
       temperature:0.7
     }
   };
-  // sem isto os modelos 2.5 gastam todo o orçamento "pensando" e devolvem texto vazio
-  if(legacyThinking) payload.generationConfig.thinkingConfig = {thinkingBudget:0};
+  if(legacy) payload.generationConfig.thinkingConfig = {thinkingBudget:0};
   else payload.generationConfig.thinkingLevel = "low";
 
   async function send(b){
@@ -1206,8 +1096,7 @@ async function geminiCall(model, system, messages, key){
           body:b, signal:ctrl.signal
         });
       }catch(e1){
-        if(e1.name === "AbortError")
-          throw gErr("o modelo não respondeu em 25s", 0, true);
+        if(e1.name === "AbortError") throw gErr("o modelo não respondeu em 25s", 0, true);
         // o cabeçalho personalizado dispara preflight; se ele for barrado, tenta pela query
         try{
           return await fetch(base+"?key="+encodeURIComponent(key),{
@@ -1233,7 +1122,6 @@ async function geminiCall(model, system, messages, key){
     const field = hit[1];
 
     if(field === "system_instruction" || field === "systemInstruction"){
-      // modelo sem suporte a instrução de sistema: ela vira o início da conversa
       delete payload.system_instruction;
       if(payload.contents[0] && payload.contents[0].role === "user"){
         payload.contents[0].parts[0].text = system+"\n\n"+payload.contents[0].parts[0].text;
@@ -1244,9 +1132,7 @@ async function geminiCall(model, system, messages, key){
       delete payload.generationConfig[field];
     }else if(field in payload){
       delete payload[field];
-    }else{
-      break;
-    }
+    }else break;
 
     r = await send(JSON.stringify(payload));
     d = await r.json().catch(()=>null);
@@ -1277,29 +1163,6 @@ async function geminiCall(model, system, messages, key){
   return t;
 }
 
-async function pGoogle(system, messages){
-  const g = AI.google;
-  if(!g.key) throw new Error("chave não preenchida");
-
-  const model = (g.model || "gemini-2.5-flash").trim().replace(/^models\//,"");
-  const waits = [2000];
-
-  let last = null;
-  for(let attempt=0; attempt<=waits.length; attempt++){
-    try{
-      const t = await geminiCall(model, system, messages, g.key);
-      AI.googleUsed = model;
-      return t;
-    }catch(e){
-      last = e;
-      if(!e.transient) throw e;                 // erro permanente: não insiste
-      if(attempt < waits.length) await sleep(waits[attempt]);
-    }
-  }
-  throw new Error(last.message+" em \u201C"+model+"\u201D — tentei "+(waits.length+1)+
-                  " vezes. Costuma ser passageiro; se persistir, escolha outro modelo.");
-}
-
 /* lista os modelos que a chave realmente pode usar */
 async function listGeminiModels(key){
   const url = "https://generativelanguage.googleapis.com/v1beta/models";
@@ -1319,106 +1182,93 @@ async function listGeminiModels(key){
     .sort();
 }
 
-/* --- Endpoint próprio, compatível com OpenAI --- */
-async function pCustom(system, messages){
-  const c = AI.custom;
-  if(!c.url) throw new Error("endpoint não configurado");
-  const h = {"Content-Type":"application/json"};
-  if(c.key) h["Authorization"] = "Bearer "+c.key;
-  const r = await fetch(c.url,{
-    method:"POST", headers:h,
-    body: JSON.stringify({
-      model: c.model || "gpt-4o-mini",
-      max_tokens: 1000,
-      messages: [{role:"system",content:system}].concat(messages)
-    })
-  });
-  if(!r.ok) throw new Error("HTTP "+r.status);
-  const d = await r.json();
-  const t = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content)
-         || (d.content && d.content.filter(b=>b.type==="text").map(b=>b.text).join("\n"))
-         || "";
-  if(!String(t).trim()) throw new Error("resposta vazia");
-  return String(t).trim();
+function withTimeout(promise, ms, label){
+  return Promise.race([
+    promise,
+    new Promise((_,rej)=>setTimeout(()=>rej(new Error(label+" demorou demais")), ms))
+  ]);
 }
 
-const PROVIDERS = {
-  anthropic:   {label:"Anthropic",    fn:pAnthropic},
-  google:      {label:"Google Gemini", fn:pGoogle, timeout:70000},
-  puter:       {label:"Puter.js",     fn:pPuter},
-  pollinations:{label:"Pollinations", fn:pPollinations},
-  custom:      {label:"Endpoint próprio", fn:pCustom}
-};
-
-function providerChain(){
-  if(AI.mode !== "auto") return [AI.mode];
-  const list = [];
-  if(AI.custom.url) list.push("custom");
-  if(AI.google.key) list.push("google");
-  if(AI.active) list.push(AI.active);
-  return list.concat(AI.order);
+async function askLLM(messages, system){
+  if(!AI.key) throw new Error("chave do Gemini não configurada");
+  const model = AI.model || "gemini-2.5-flash";
+  const waits = [2000];
+  let last = null;
+  for(let attempt=0; attempt<=waits.length; attempt++){
+    try{
+      const t = await withTimeout(geminiCall(model, system, messages, AI.key), 70000, "Gemini");
+      AI.ready = true; paintAI();
+      return t;
+    }catch(e){
+      last = e;
+      if(!e.transient){ AI.ready = false; paintAI(); throw e; }
+      if(attempt < waits.length) await sleep(waits[attempt]);
+    }
+  }
+  AI.ready = false; paintAI();
+  throw new Error(last.message+" em \u201C"+model+"\u201D — costuma ser passageiro, tente de novo em instantes");
 }
+
+function callClaude(messages, system){ return askLLM(messages, system); }
 
 function paintAI(){
   const el = $("aiStatus");
   if(!el) return;
-  if(AI.active){
-    el.textContent = PROVIDERS[AI.active].label +
-      (AI.active === "google" && AI.googleUsed ? " · "+AI.googleUsed : "");
-  }
-  else if(AI.mode !== "auto") el.textContent = PROVIDERS[AI.mode].label+" (não testado)";
-  else el.textContent = "detectando…";
+  if(!AI.key) el.textContent = "não configurado";
+  else el.textContent = (AI.model || "gemini-2.5-flash") + (AI.ready ? "" : " (não testado)");
 }
 
-async function askLLM(messages, system, opts){
-  const chain = providerChain();
-  const tried = new Set();
-  const errs = [];
-  for(const id of chain){
-    if(tried.has(id) || !PROVIDERS[id]) continue;
-    tried.add(id);
-    if(AI.mode === "auto" && AI.dead[id]) continue;
-    try{
-      const t = await withTimeout(PROVIDERS[id].fn(system, messages, opts),
-                                  PROVIDERS[id].timeout || 35000, PROVIDERS[id].label);
-      AI.active = id; paintAI();
-      return t;
-    }catch(e){
-      errs.push(PROVIDERS[id].label+": "+e.message);
-      if(AI.mode === "auto") AI.dead[id] = true;
-      if(AI.active === id){ AI.active = null; paintAI(); }
-    }
-  }
-  AI.dead = {};
-  throw new Error(errs.join(" | ") || "nenhum motor disponível");
-}
+/* --- preferências: localStorage do navegador, com window.storage como reserva --- */
+const AI_STORE = "vozli:ai";
 
-/* compatibilidade com as chamadas existentes */
-function callClaude(messages, system, tools){
-  return askLLM(messages, system, tools ? {tools} : null);
-}
+function lsGet(k){ try{ return window.localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ window.localStorage.setItem(k,v); return true; }catch(e){ return false; } }
+function lsDel(k){ try{ window.localStorage.removeItem(k); }catch(e){} }
 
-/* --- preferências --- */
-async function loadAIPrefs(){
+function applyPrefs(raw){
+  if(!raw) return false;
   try{
-    if(typeof window.storage === "undefined") return;
-    const r = await window.storage.get("vozli:ai");
-    if(!r || !r.value) return;
-    const j = JSON.parse(r.value);
-    AI.mode = j.mode || "auto";
-    AI.custom = Object.assign({url:"",model:"",key:""}, j.custom||{});
-    AI.google = Object.assign({key:"",model:""}, j.google||{});
+    const j = JSON.parse(raw);
+    AI.key = j.key || "";
+    AI.model = j.model || "";
+    AI.list = Array.isArray(j.list) ? j.list : [];
+    return true;
+  }catch(e){ return false; }
+}
+
+async function loadAIPrefs(){
+  let ok = applyPrefs(lsGet(AI_STORE));
+  if(!ok){
+    try{
+      if(typeof window.storage !== "undefined"){
+        const r = await window.storage.get(AI_STORE);
+        if(r && r.value && applyPrefs(r.value)){
+          ok = true;
+          lsSet(AI_STORE, r.value);   // migra para o navegador
+        }
+      }
+    }catch(e){}
+  }
+  syncAIForm(); paintAI();
+}
+
+async function saveAIPrefs(){
+  const raw = JSON.stringify({key:AI.key, model:AI.model, list:AI.list});
+  const saved = lsSet(AI_STORE, raw);
+  try{
+    if(typeof window.storage !== "undefined") await window.storage.set(AI_STORE, raw);
+  }catch(e){}
+  return saved;
+}
+
+async function forgetAIPrefs(){
+  AI.key=""; AI.model=""; AI.list=[]; AI.ready=false;
+  lsDel(AI_STORE);
+  try{
+    if(typeof window.storage !== "undefined") await window.storage.delete(AI_STORE);
   }catch(e){}
   syncAIForm(); paintAI();
 }
-async function saveAIPrefs(){
-  try{
-    if(typeof window.storage === "undefined") return;
-    await window.storage.set("vozli:ai", JSON.stringify({mode:AI.mode, custom:AI.custom, google:AI.google}));
-  }catch(e){}
-}
-
-const GEMINI_DEFAULTS = ["gemini-3.8-flash","gemini-3-flash-preview","gemini-2.5-flash","gemini-2.5-flash-lite","gemini-2.5-pro"];
 
 function setModelOptions(list, selected){
   const sel = $("gModelSel");
@@ -1434,26 +1284,14 @@ function currentModel(){
   return sel.value === "__custom" ? $("gModel").value.trim() : sel.value;
 }
 
-function toggleAIBoxes(){
-  const m = $("aiMode").value;
-  $("customBox").hidden = m !== "custom";
-  $("googleBox").hidden = !(m === "google" || (m === "auto" && AI.google.key));
-}
-
 function syncAIForm(){
-  $("aiMode").value = AI.mode;
-  $("aiUrl").value = AI.custom.url;
-  $("aiModel").value = AI.custom.model;
-  $("aiKey").value = AI.custom.key;
-  $("gKey").value = AI.google.key;
-  setModelOptions(AI.googleList && AI.googleList.length ? AI.googleList : GEMINI_DEFAULTS, AI.google.model);
-  toggleAIBoxes();
+  $("gKey").value = AI.key;
+  setModelOptions(AI.list.length ? AI.list : GEMINI_DEFAULTS, AI.model);
 }
 function readAIForm(){
-  AI.mode = $("aiMode").value;
-  AI.custom = {url:$("aiUrl").value.trim(), model:$("aiModel").value.trim(), key:$("aiKey").value.trim()};
-  AI.google = {key:$("gKey").value.trim(), model:currentModel()};
-  AI.dead = {}; AI.active = null;
+  AI.key = $("gKey").value.trim();
+  AI.model = currentModel();
+  AI.ready = false;
 }
 
 function aiMsg(text, kind){
@@ -1464,14 +1302,7 @@ function aiMsg(text, kind){
 
 $("aiBtn").addEventListener("click", ()=>{ closePlan(); syncAIForm(); aiMsg(""); $("aiVeil").classList.add("on"); });
 $("aiClose").addEventListener("click", ()=> $("aiVeil").classList.remove("on"));
-$("aiMode").addEventListener("change", ()=>{
-  AI.google.key = $("gKey").value.trim();
-  toggleAIBoxes();
-});
-$("aiSave").addEventListener("click", async ()=>{
-  readAIForm(); await saveAIPrefs(); paintAI();
-  aiMsg("Preferências salvas.","ok");
-});
+
 $("gModelSel").addEventListener("change", ()=>{
   const custom = $("gModelSel").value === "__custom";
   $("gModel").hidden = !custom;
@@ -1485,7 +1316,7 @@ $("gList").addEventListener("click", async ()=>{
   try{
     const list = await listGeminiModels(key);
     if(!list.length){ aiMsg("A chave não retornou nenhum modelo de geração de texto.","err"); return; }
-    AI.googleList = list;
+    AI.list = list;
     const atual = currentModel();
     setModelOptions(list, list.indexOf(atual) > -1 ? atual : null);
     aiMsg(list.length+" modelos liberados para esta chave. A lista acima agora mostra só os que funcionam"+
@@ -1495,13 +1326,27 @@ $("gList").addEventListener("click", async ()=>{
   }
 });
 
+$("aiSave").addEventListener("click", async ()=>{
+  readAIForm();
+  const saved = await saveAIPrefs();
+  paintAI();
+  if(!AI.key) aiMsg("Salvo, mas sem chave o professor fica indisponível.","err");
+  else if(saved) aiMsg("Chave e modelo gravados neste navegador. Não precisa preencher de novo.","ok");
+  else aiMsg("Valeu para esta sessão, mas este navegador bloqueou a gravação local — em janela anônima ou embutida isso é comum.","err");
+});
+
+$("aiForget").addEventListener("click", async ()=>{
+  await forgetAIPrefs();
+  aiMsg("Chave apagada deste navegador.","ok");
+});
+
 $("aiCheck").addEventListener("click", async ()=>{
   readAIForm(); await saveAIPrefs();
+  if(!AI.key){ aiMsg("Preencha a chave da API primeiro.","err"); return; }
   aiMsg("Testando…");
   try{
     const t = await askLLM([{role:"user",content:"Responda apenas com a palavra: ok"}], "You answer with a single lowercase word.");
-    const via = PROVIDERS[AI.active].label + (AI.active === "google" && AI.googleUsed ? " ("+AI.googleUsed+")" : "");
-    aiMsg("Conectado por "+via+". Resposta: "+t.slice(0,40),"ok");
+    aiMsg("Conectado por "+(AI.model||"gemini-2.5-flash")+". Resposta: "+t.slice(0,40),"ok");
   }catch(e){
     let m = "Falhou. "+e.message;
     if(/bloquead|failed to fetch|networkerror|load failed/i.test(e.message)){
@@ -1525,8 +1370,7 @@ async function judge(it, ans){
   const usr = "Direction: "+direction+"\nPrompt shown to the student: "+it.prompt+
               "\nAccepted answers: "+it.accept.join(" | ")+"\nStudent answer: "+ans;
   try{
-    const tools = S.useWeb ? [{type:"web_search_20250305",name:"web_search"}] : null;
-    let raw = await callClaude([{role:"user",content:usr}], sys, tools);
+    let raw = await callClaude([{role:"user",content:usr}], sys);
     raw = raw.replace(/```json|```/g,"").trim();
     const m = raw.match(/\{[\s\S]*\}/);
     const j = JSON.parse(m ? m[0] : raw);
@@ -1632,9 +1476,10 @@ function endSession(){
 }
 
 async function saveBest(rate){
+  const raw = JSON.stringify({rate, correct:S.correct, stage:S.stage, at:Date.now()});
+  lsSet("vozli:last", raw);
   try{
-    if(typeof window.storage === "undefined") return;
-    await window.storage.set("vozli:last", JSON.stringify({rate, correct:S.correct, stage:S.stage, at:Date.now()}));
+    if(typeof window.storage !== "undefined") await window.storage.set("vozli:last", raw);
   }catch(e){}
 }
 
@@ -1984,7 +1829,6 @@ $("miniBar").addEventListener("click", ()=>{
 });
 $("planClose").addEventListener("click", closePlan);
 $("closeSrc").addEventListener("click", ()=> $("srcVeil").classList.remove("on"));
-$("webTool").addEventListener("change", e=>{ S.useWeb = e.target.checked; });
 
 $("stopBtn").addEventListener("click", stopSession);
 $("closeEnd").addEventListener("click", ()=>{
